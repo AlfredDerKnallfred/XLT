@@ -32,7 +32,6 @@ import com.xceptance.xlt.api.engine.PageLoadTimingData;
 import com.xceptance.xlt.api.engine.RequestData;
 import com.xceptance.xlt.api.engine.TransactionData;
 import com.xceptance.xlt.report.mergerules.RequestProcessingRule;
-import com.xceptance.xlt.report.mergerules.RequestProcessingRuleResult;
 
 /**
  * Parses lines to data records and performs any data record preprocessing that can be done in parallel. Preprocessing
@@ -290,11 +289,8 @@ class DataParserThread implements Runnable
 
             try
             {
-                final RequestProcessingRuleResult result = requestProcessingRule.process(requestData);
-
-                requestData = result.requestData;
-
-                if (result.stopRequestProcessing)
+                // request data comes back indirectly modified if needed
+                if (requestProcessingRule.process(requestData))
                 {
                     break;
                 }

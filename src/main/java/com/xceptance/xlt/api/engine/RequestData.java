@@ -162,6 +162,11 @@ public class RequestData extends TimerData
     private String ipAddresses;
 
     /**
+     * Used for later processing of merge rules as a flag to ensure proper stopping of rule processing
+     */
+    private boolean stopMergeRuleProcessing;
+    
+    /**
      * Creates a new RequestData object.
      */
     public RequestData()

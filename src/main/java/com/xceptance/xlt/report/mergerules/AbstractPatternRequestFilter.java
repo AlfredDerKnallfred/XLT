@@ -34,10 +34,10 @@ public abstract class AbstractPatternRequestFilter extends AbstractRequestFilter
     /**
      * Cache the expensive stuff but with little sync overhead
      */
-    private ThreadLocal<LRUFastHashMap<String, Matcher>> cache = new ThreadLocal<LRUFastHashMap<String, Matcher>>() 
+    private ThreadLocal<LRUFastHashMap<CharSequence, Matcher>> cache = new ThreadLocal<LRUFastHashMap<CharSequence, Matcher>>() 
     {
         @Override 
-        protected LRUFastHashMap<String, Matcher> initialValue() 
+        protected LRUFastHashMap<CharSequence, Matcher> initialValue() 
         {
             return new LRUFastHashMap<>(cacheSize);
         }
@@ -108,7 +108,7 @@ public abstract class AbstractPatternRequestFilter extends AbstractRequestFilter
      *
      * @return the text
      */
-    protected abstract String getText(RequestData requestData);
+    protected abstract CharSequence getText(final RequestData requestData);
 
     /**
      * {@inheritDoc}
@@ -123,14 +123,14 @@ public abstract class AbstractPatternRequestFilter extends AbstractRequestFilter
         }
 
         // get the data to match against
-        final String text = getText(requestData);
+        final CharSequence text = getText(requestData);
 
         // only cache if we want that, there are areas where caching does not make sense and wastes
         // a lot of time, such as urls
         if (cacheSize > 0)
         {
             // get us a local reference to the cache
-            final LRUFastHashMap<String, Matcher> cache = this.cache.get();
+            final LRUFastHashMap<CharSequence, Matcher> cache = this.cache.get();
 
             Matcher result = cache.get(text);
             if (result == null)
@@ -166,7 +166,7 @@ public abstract class AbstractPatternRequestFilter extends AbstractRequestFilter
      * {@inheritDoc}
      */ 
     @Override
-    public String getReplacementText(final RequestData requestData, final int capturingGroupIndex, final Object filterState)
+    public CharSequence getReplacementText(final RequestData requestData, final int capturingGroupIndex, final Object filterState)
     {
         if (isExclude || pattern == null || capturingGroupIndex == -1)
         {

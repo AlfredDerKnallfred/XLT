@@ -469,39 +469,72 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     }
 
     /**
-     * Assume we are not mutating... if we mutate, we have to reset the hashCode
+     * Optimized hashcode calculation for large strings using all execution units of the CPU.
+     * You are not supposed to call this directly, it is rather public for testing. This is a trade
+     * off between cpu and branches. 
      * 
-     * @return the hashcode, similar to what a normal string would deliver
+     * @return the hash code
      */
-    @Override
-    public int hashCode()
+    public int hashCodeVectored()
     {
-        if (hashCode != 0)
-        {
-            return hashCode;
-        }
-
         final int last = length + from;
 
         int h = 0;
         int i0 = from;
         int i1 = from + 1;
         int i2 = from + 2;
-        while (i2 < last) {
-            h = h * (31 * 31 * 31) + src[i0] * (31 * 31) + src[i1] * 31 + src[i2];
-            i0 = i2 + 1;
-            i1 = i0 + 1;
-            i2 = i1 + 1;
+        int i3 = from + 3;
+        while (i3 < last) {
+            h = h * (31 * 31 * 31 * 31) + src[i0] * (31 * 31 * 31) + src[i1] * (31 * 31) + src[i2] * 31 + src[i3];
+            
+            i0 = i3 + 1;
+            i1 = i3 + 2;
+            i2 = i3 + 3;
+            i3 = i3 + 4;
         }
-        if (i0 < last) {
+        if (i2 < last) {
+            h = h * (31 * 31 * 31) + src[i0] * (31 * 31) + src[i1] * (31) + src[i2];
+        }
+        else if (i1 < last) {
+            h = h * (31 * 31) + src[i0] * (31) + src[i1];
+        }
+        else if (i0 < last) {
             h = h * 31 + src[i0];
         }
-        if (i1 < last) {
-            h = h * 31 + src[i1];
+        
+        return h; 
+    }
+    
+    /**
+     * Assume we are not mutating... if we mutate, we would have to reset the hashCode
+     * 
+     * @return the hashcode, similar to what a normal string would deliver
+     */
+    @Override
+    public int hashCode()
+    {
+        // it was cached before
+        if (hashCode != 0)
+        {
+            return hashCode;
         }
         
-        hashCode = h;
-        return h; 
+        // use the vectored approach for longer strings
+        // disabled for now, does not seem to fly well when the entire program runs, while as JMH it is faster
+//        if (length > 50)
+//        {
+//            // cache and return
+//            return hashCode = hashCodeVectored();
+//        }
+        
+        final int last = length + from;
+
+        int h = 0;
+        for (int i = from; i < last; i++) {
+            h = ((h << 5) - h) + src[i];
+        }
+        
+        return hashCode = h; 
     }
 
     /**

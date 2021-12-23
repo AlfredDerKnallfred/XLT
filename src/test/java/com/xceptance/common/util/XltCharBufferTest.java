@@ -2,6 +2,7 @@ package com.xceptance.common.util;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -187,6 +188,43 @@ public class XltCharBufferTest
     }
 
     @Test
+    public void hashCode_test()
+    {
+        Assert.assertEquals(new String("").hashCode(), XltCharBuffer.valueOf("").hashCode());
+        Assert.assertEquals(new String(" ").hashCode(), XltCharBuffer.valueOf(" ").hashCode());
+        Assert.assertEquals(new String("  ").hashCode(), XltCharBuffer.valueOf("  ").hashCode());
+        Assert.assertEquals(new String("Foobar").hashCode(), XltCharBuffer.valueOf("Foobar").hashCode());
+        Assert.assertEquals(new String("Das ist ein Test.").hashCode(), XltCharBuffer.valueOf("Das ist ein Test.").hashCode());
+        Assert.assertEquals(new String("ist").hashCode(), XltCharBuffer.valueOf("Das ist ein Test.").substring(4, 7).hashCode());
+
+        // longer strings fall back to vector
+        for (int i = 99; i < 110; i ++)
+        {
+            final String s = RandomStringUtils.random(i, "0123456789");
+            Assert.assertEquals(s.hashCode(), XltCharBuffer.valueOf(s).hashCode());
+        }
+    }
+
+    @Test
+    public void hashCodeVectored_test()
+    {
+        Assert.assertEquals(new String("").hashCode(), XltCharBuffer.valueOf("").hashCodeVectored());
+        Assert.assertEquals(new String(" ").hashCode(), XltCharBuffer.valueOf(" ").hashCodeVectored());
+        Assert.assertEquals(new String("  ").hashCode(), XltCharBuffer.valueOf("  ").hashCodeVectored());
+        Assert.assertEquals(new String("Foobar").hashCode(), XltCharBuffer.valueOf("Foobar").hashCodeVectored());
+        Assert.assertEquals(new String("Das ist ein Test.").hashCode(), XltCharBuffer.valueOf("Das ist ein Test.").hashCodeVectored());
+        Assert.assertEquals(new String("ist").hashCode(), XltCharBuffer.valueOf("Das ist ein Test.").substring(4, 7).hashCodeVectored());
+
+        Assert.assertEquals(new String("0").hashCode(), XltCharBuffer.valueOf("0").hashCodeVectored());
+        Assert.assertEquals(new String("01").hashCode(), XltCharBuffer.valueOf("01").hashCodeVectored());
+        Assert.assertEquals(new String("012").hashCode(), XltCharBuffer.valueOf("012").hashCodeVectored());
+        Assert.assertEquals(new String("0123").hashCode(), XltCharBuffer.valueOf("0123").hashCodeVectored());
+        Assert.assertEquals(new String("01234").hashCode(), XltCharBuffer.valueOf("01234").hashCodeVectored());
+        Assert.assertEquals(new String("012345").hashCode(), XltCharBuffer.valueOf("012345").hashCodeVectored());
+    }
+
+
+    @Test
     public void compare()
     {
         {
@@ -198,7 +236,7 @@ public class XltCharBufferTest
         {
             XltCharBuffer a = XltCharBuffer.valueOf("abcd").substring(0, 1);
             XltCharBuffer b = XltCharBuffer.valueOf("abcd").substring(1, 2);
-            
+
             assertEquals(0, a.compareTo(a));
             assertEquals(-1, a.compareTo(b));
             assertEquals(1, b.compareTo(a));
@@ -207,7 +245,7 @@ public class XltCharBufferTest
             XltCharBuffer x = XltCharBuffer.valueOf("1234abcd1234").substring(4, 8);
             XltCharBuffer a = x.substring(0, 1);
             XltCharBuffer b = x.substring(1, 2);
-            
+
             assertEquals(0, a.compareTo(a));
             assertEquals(-1, a.compareTo(b));
             assertEquals(1, b.compareTo(a));

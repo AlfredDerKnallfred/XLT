@@ -65,11 +65,6 @@ public class RequestProcessingRule
     private final PlaceholderPosition[] newNamePlaceholders;
 
     /**
-     * The rule to stop things
-     */
-    private static RequestProcessingRuleResult EMPTY_RULE_RESULT = new RequestProcessingRuleResult(null, true);
-    
-    /**
      * Constructor.
      *
      * @param newName
@@ -244,10 +239,10 @@ public class RequestProcessingRule
      * name. This is a multi-threaded routine aka in use by several threads at the same time.
      *
      * @param requestData
-     *            the request data object to process
-     * @return <code>true</code> if processing is complete, or <code>false</code> if other merge rules should be applied
+     *            the request data object to process, will also be directly modified as result
+     * @return true if we want to stop, false otherwise
      */
-    public RequestProcessingRuleResult process(final RequestData requestData)
+    public boolean process(final RequestData requestData)
     {
         // try each filter and remember its state for later processing
         final int requestFiltersSize = requestFilters.length;
@@ -262,7 +257,7 @@ public class RequestProcessingRule
                 // return early since one of the filters did *not* apply
 
                 // continue request processing with an unmodified result
-                return new RequestProcessingRuleResult(requestData, false);
+                return false;
             }
         }
 
@@ -270,7 +265,7 @@ public class RequestProcessingRule
         if (dropOnMatch)
         {
             // stop request processing with a null request
-            return EMPTY_RULE_RESULT;
+            return true;
         }
 
         // anything to do?
@@ -295,10 +290,12 @@ public class RequestProcessingRule
                         final Object filterState = filterStates[i];
 
                         // get replacement
-                        final String replacement = requestFilter.getReplacementText(requestData, capturingGroupIndex, filterState);
+                        final CharSequence replacement = requestFilter.getReplacementText(requestData, capturingGroupIndex, filterState);
 
                         // replace the placeholder with the real values
-                        result.replace(placeholder.start + displacement, placeholder.end + displacement, replacement);
+                        // result.replace(placeholder.start + displacement, placeholder.end + displacement, replacement);
+                        result.delete(placeholder.start + displacement, placeholder.end + displacement);
+                        result.insert(placeholder.start + displacement, replacement);
 
                         // adjust the displacement for the next replace
                         displacement += replacement.length() - placeholder.length;
@@ -317,7 +314,7 @@ public class RequestProcessingRule
             requestData.setName(newName);
         }
 
-        return new RequestProcessingRuleResult(requestData, stopOnMatch);
+        return stopOnMatch;
     }
 
     /**
@@ -390,7 +387,7 @@ public class RequestProcessingRule
                     if (filter instanceof AbstractPatternRequestFilter)
                     {
                         final AbstractPatternRequestFilter patternFilter = (AbstractPatternRequestFilter) filter;
-
+                        
                         // TODO: #3252
                         // if (placeholderPosition.index != -1)
                         // {

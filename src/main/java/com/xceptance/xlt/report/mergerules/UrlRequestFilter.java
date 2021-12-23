@@ -52,8 +52,8 @@ public class UrlRequestFilter extends AbstractPatternRequestFilter
      * {@inheritDoc}
      */
     @Override
-    protected String getText(final RequestData requestData)
+    protected CharSequence getText(final RequestData requestData)
     {
-        return requestData.getUrl().toString();
+        return requestData.getUrl();
     }
 }

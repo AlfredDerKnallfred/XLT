@@ -50,7 +50,7 @@ public class StatusCodeRequestFilter extends AbstractPatternRequestFilter
      * {@inheritDoc}
      */
     @Override
-    protected String getText(final RequestData requestData)
+    protected CharSequence getText(final RequestData requestData)
     {
         return Integer.toString(requestData.getResponseCode());
     }

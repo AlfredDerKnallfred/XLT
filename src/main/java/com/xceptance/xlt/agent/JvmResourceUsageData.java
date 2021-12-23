@@ -556,8 +556,6 @@ public class JvmResourceUsageData extends AbstractData
     @Override
     protected void parseValues(final List<XltCharBuffer> values)
     {
-        super.parseValues(values);
-
         // read and check the values
         cpuUsage = Double.parseDouble(values.get(3).toString());
         committedMemorySize = Long.parseLong(values.get(4).toString());

@@ -145,8 +145,6 @@ public abstract class TimerData extends AbstractData
     @Override
     protected void parseValues(final List<XltCharBuffer> values)
     {
-        super.parseValues(values);
-
         // read and check the values
         runTime = ParseNumbers.parseInt(values.get(3));
 

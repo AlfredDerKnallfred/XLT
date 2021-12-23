@@ -56,6 +56,11 @@ public abstract class AbstractData implements Data
     private String agentName;
 
     /**
+     * Holds the partially parsed state, don't rely on it, this is here for speed, not beauty
+     */
+    private List<XltCharBuffer> fields;
+    
+    /**
      * Creates a new AbstractData object and gives it the specified name and type code.
      * 
      * @param name
@@ -84,12 +89,21 @@ public abstract class AbstractData implements Data
      * {@inheritDoc}
      */
     @Override
-    public final void fromCSV(final XltCharBuffer s)
+    public final void baseValuesFromCSV(final XltCharBuffer s)
     {
-        final List<XltCharBuffer> fields = CsvUtilsDecode.parse(s, DELIMITER);
-        parseValues(fields);
+        fields = CsvUtilsDecode.parse(s, DELIMITER);
+        parseBaseValues(fields);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final void fromCSV()
+    {
+        parseValues(fields);
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -220,13 +234,12 @@ public abstract class AbstractData implements Data
     }
 
     /**
-     * Recreates the state of this object from an array of string values. Override this method in sub classes to restore
-     * custom values, but do not forget to call the super class first.
+     * Recreates the base states, such as time and typecode
      * 
      * @param values
      *            the list of values, must have at least the length {@link #getMinNoCSVElements()}
      */
-    protected void parseValues(final List<XltCharBuffer> values)
+    protected void parseBaseValues(final List<XltCharBuffer> values)
     {
         if (values.size() < getMinNoCSVElements())
         {
@@ -255,6 +268,15 @@ public abstract class AbstractData implements Data
         }
     }
 
+    /**
+     * Recreates the state of this object from an array of values. Override this method in sub classes to restore
+     * custom values.
+     * 
+     * @param values
+     *            the list of values, must have at least the length {@link #getMinNoCSVElements()}
+     */
+    protected abstract void parseValues(final List<XltCharBuffer> values);
+    
     @Override
     public int compareTo(final Data o)
     {

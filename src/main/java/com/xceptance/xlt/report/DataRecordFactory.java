@@ -100,7 +100,7 @@ public class DataRecordFactory
         final Constructor<? extends Data> c = ctrs[src.get(0) - offset];
         final Data data = c.newInstance();
 
-        data.fromCSV(src);
+        data.baseValuesFromCSV(src);
 
         return data;
     }

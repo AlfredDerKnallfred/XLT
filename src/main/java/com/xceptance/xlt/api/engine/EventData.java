@@ -142,8 +142,6 @@ public class EventData extends AbstractData
     @Override
     protected void parseValues(final List<XltCharBuffer> values)
     {
-        super.parseValues(values);
-
         // read and check the values
         testCaseName = values.get(3).toString();
         message = values.get(4).toString();

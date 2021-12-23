@@ -136,11 +136,33 @@ class DataParserThread implements Runnable
                 final int size = lines.size();
                 for (int i = 0; i < size; i++)
                 {
-                    Data data = parseLine(lines.get(i), lineNumber, file);
+                    Data data = null;
+                    
+                    try
+                    {
+                        // parse the data record initially
+                        data = dataRecordFactory.createStatistics(lines.get(i));
+                        
+                        final long time = data.getTime();
+                        if (time < _fromTime || time > _toTime)
+                        {
+                            continue;
+                        }
+                        
+                        // finish it
+                        data.fromCSV();
+                    }
+                    catch (final Exception ex)
+                    {
+                        final String msg = String.format("Failed to parse data record at line %,d in file '%s': %s\nLine is: ", lineNumber, file, ex, lines.get(i).toString());
+                        LOG.error(msg);
+                        ex.printStackTrace();
+                        
+                        continue;
+                    }
+                    
                     if (data != null)
                     {
-                        if (filterByTime(data, _fromTime, _toTime) == false)
-                        {
                             data = applyDataAdjustments(data, agentName, testCaseName, userNumber,
                                                         collectActionNames, chunk, adjustTimerName);
 
@@ -159,7 +181,6 @@ class DataParserThread implements Runnable
                                 data.getName().hashCode();
                                 postProcessedData.add(data);
                             }
-                        }
                     }
 
                     lineNumber++;
@@ -172,48 +193,6 @@ class DataParserThread implements Runnable
             {
                 break;
             }
-        }
-    }
-
-    /**
-     * Parses the given line to a data record.
-     *
-     * @param line
-     *            the line to parse
-     * @param lineNumber
-     *            the number of the line in its file (for logging purposes)
-     * @param file
-     *              the file it came from for error reporting just in case
-     * @return the parsed data record
-     */
-    private Data parseLine(final XltCharBuffer line, final int lineNumber, final FileObject file)
-    {
-        try
-        {
-            // parse the data record
-            return dataRecordFactory.createStatistics(line);
-        }
-        catch (final Exception ex)
-        {
-            final String msg = String.format("Failed to parse data record at line %,d in file '%s': %s\nLine is: ", lineNumber, file, ex, line.toString());
-            LOG.error(msg);
-            ex.printStackTrace();
-
-            return null;
-        }
-    }
-
-    private boolean filterByTime(final Data data, final long fromTime, final long toTime)
-    {
-        // skip the data record if it was not generated in the given time period
-        final long time = data.getTime();
-        if (time < fromTime || time > toTime)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
         }
     }
 

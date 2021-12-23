@@ -104,7 +104,6 @@ public class CustomValue extends AbstractData
     @Override
     protected void parseValues(final List<XltCharBuffer> values)
     {
-        super.parseValues(values);
         value = Double.parseDouble(values.get(3).toString());
     }
 }

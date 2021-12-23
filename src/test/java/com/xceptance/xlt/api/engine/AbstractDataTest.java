@@ -321,15 +321,15 @@ public class AbstractDataTest extends AbstractXLTTestCase
             super('0');
         }
 
-        protected void parseValue(final List<XltCharBuffer> values)
-        {
-            super.parseValues(values);
-        }
-
         @Override
         protected int getMinNoCSVElements()
         {
             return super.getMinNoCSVElements();
+        }
+
+        @Override
+        protected void parseValues(List<XltCharBuffer> values)
+        {
         }
     }
 }

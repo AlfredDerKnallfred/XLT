@@ -51,28 +51,31 @@ public interface Data extends Comparable<Data>
     public static final char DELIMITER = ',';
 
     /**
-     * Recreates the state of this object from a list of values separated by the DELIMITER constant.
-     * 
-     * @param s
-     *            the special char array to parse within
+     * Recreates the state of this object from a list of values separated by the DELIMITER constant
+     * which has been previously created by baseValuesFromCSV 
      */
-    public void fromCSV(final XltCharBuffer s);
-
+    public void fromCSV();    
+    
     /**
-     * Recreates the state of this object from a list of values separated by the DELIMITER constant.
-     * This method is default to keep the API compatible. Internal processing should use the faster
-     * version with a reusable OpenStringBuilder.
-     * 
-     * @param s
-     *            the char data to parse from
-     *            
-     * @deprecated since XLT 6.0. This
+     * {@inheritDoc}
      */
-    @Deprecated
-    public default void fromCSV(final String s)
-    {
-        fromCSV(XltCharBuffer.valueOf(s));
-    }
+    public void baseValuesFromCSV(final XltCharBuffer s);
+
+//    /**
+//     * Recreates the state of this object from a list of values separated by the DELIMITER constant.
+//     * This method is default to keep the API compatible. Internal processing should use the faster
+//     * version with a reusable OpenStringBuilder.
+//     * 
+//     * @param s
+//     *            the char data to parse from
+//     *            
+//     * @deprecated since XLT 6.0. This
+//     */
+//    @Deprecated
+//    public default void fromCSV(final String s)
+//    {
+//        fromCSV(XltCharBuffer.valueOf(s));
+//    }
     
     /**
      * Returns the name of the agent that produced this data record. Only used during report generation or analysis.

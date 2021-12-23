@@ -15,7 +15,6 @@
  */
 package com.xceptance.xlt.report;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -30,8 +29,6 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileType;
 
 import com.xceptance.common.io.LeanestBufferedReaderAppend;
-import com.xceptance.common.io.MyBufferedReader;
-import com.xceptance.common.lang.OpenStringBuilder;
 import com.xceptance.common.util.SimpleArrayList;
 import com.xceptance.common.util.XltCharBuffer;
 import com.xceptance.xlt.common.XltConstants;
@@ -214,7 +211,7 @@ class DataReaderThread implements Runnable
                                                                                   new GZIPInputStream(file.getContent().getInputStream()) : file.getContent().getInputStream()
                                                                                   , XltConstants.UTF8_ENCODING)))
         {
-            List<XltCharBuffer> lines = new SimpleArrayList<>(chunkSize + 1);
+            List<XltCharBuffer> lines = new SimpleArrayList<>(chunkSize);
             int baseLineNumber = 1;  // let line numbering start at 1
             int linesRead = 0;
 
@@ -235,7 +232,7 @@ class DataReaderThread implements Runnable
                     dispatcher.addReadData(lineChunk);
                     
                     // start a new chunk
-                    lines = new SimpleArrayList<>(chunkSize + 1);
+                    lines = new SimpleArrayList<>(chunkSize);
                     baseLineNumber += linesRead;
 
                     totalLineCounter.addAndGet(linesRead);

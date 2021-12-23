@@ -26,7 +26,7 @@ No merge rules, no statistics processor
 42,704,293 records read - 14,035 ms - 3,042,700 lines/s
 
 No merge rules, no statistics processor, no RequestData.setUrl
-2,704,293 records read - 9,328 ms - 4,578,076 lines/s
+42,704,293 records read - 9,328 ms - 4,578,076 lines/s
 
 No merge rules, no statistics processor, RequestData.setUrl - no hashCodeOfUrlWithoutFragment
 42,704,293 records read - 12,421 ms - 3,438,072 lines/s

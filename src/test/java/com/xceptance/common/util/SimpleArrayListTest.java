@@ -175,4 +175,36 @@ public class SimpleArrayListTest
         Assert.assertEquals(new Integer(3), result.get(2).get(0));
         
     }
+    
+    @Test
+    public void clear()
+    {
+        final SimpleArrayList<String> l = new SimpleArrayList<>(5);
+        l.add("a");
+        l.add("b");
+        l.add("c");
+        l.add("d");
+        l.add("e");
+        Assert.assertEquals(5, l.size());
+
+        Assert.assertEquals("a", l.get(0));
+        Assert.assertEquals("b", l.get(1));
+        Assert.assertEquals("c", l.get(2));
+        Assert.assertEquals("d", l.get(3));
+        Assert.assertEquals("e", l.get(4));
+        
+        l.clear();
+        
+        Assert.assertEquals(0, l.size());
+        
+        // we are not checking ranges or such... hence this now works!!!
+        Assert.assertEquals("a", l.get(0));
+
+        l.clear();
+        Assert.assertEquals(0, l.size());
+        l.add("e1");
+        Assert.assertEquals(1, l.size());
+        Assert.assertEquals("e1", l.get(0));
+
+    }
 }

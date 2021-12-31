@@ -15,6 +15,7 @@
  */
 package com.xceptance.xlt.api.engine;
 
+import com.xceptance.common.util.SimpleArrayList;
 import com.xceptance.common.util.XltCharBuffer;
 
 /**
@@ -54,12 +55,12 @@ public interface Data extends Comparable<Data>
      * Recreates the state of this object from a list of values separated by the DELIMITER constant
      * which has been previously created by baseValuesFromCSV 
      */
-    public void fromCSV();    
+    public void fromCSV(SimpleArrayList<XltCharBuffer> resultSoFar);    
     
     /**
      * {@inheritDoc}
      */
-    public void baseValuesFromCSV(final XltCharBuffer s);
+    public void baseValuesFromCSV(final SimpleArrayList<XltCharBuffer> result, final XltCharBuffer s);
 
 //    /**
 //     * Recreates the state of this object from a list of values separated by the DELIMITER constant.

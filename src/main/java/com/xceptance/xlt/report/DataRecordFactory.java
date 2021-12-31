@@ -18,6 +18,7 @@ package com.xceptance.xlt.report;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
+import com.xceptance.common.util.SimpleArrayList;
 import com.xceptance.common.util.XltCharBuffer;
 import com.xceptance.xlt.api.engine.Data;
 
@@ -89,7 +90,7 @@ public class DataRecordFactory
     }
 
     /**
-     * Parse the the line into a suitable data record
+     * Determine the record time, but don't parse it yet
      * @param s the csv line to parse
      * @return the parsed csv line as fitting data object
      * @throws Exception
@@ -99,8 +100,6 @@ public class DataRecordFactory
         // create the statistics object
         final Constructor<? extends Data> c = ctrs[src.get(0) - offset];
         final Data data = c.newInstance();
-
-        data.baseValuesFromCSV(src);
 
         return data;
     }

@@ -627,6 +627,7 @@ public class RequestData extends TimerData
         else
         {   
             host = hostName;
+            hostName.hashCode(); // get the hashcode while it is warm
         }
         
         this.url = url;

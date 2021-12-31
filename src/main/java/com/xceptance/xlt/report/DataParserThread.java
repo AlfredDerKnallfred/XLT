@@ -32,6 +32,9 @@ import com.xceptance.xlt.api.engine.PageLoadTimingData;
 import com.xceptance.xlt.api.engine.RequestData;
 import com.xceptance.xlt.api.engine.TransactionData;
 import com.xceptance.xlt.report.mergerules.RequestProcessingRule;
+import com.zaxxer.sparsebits.SparseBitSet;
+
+import it.unimi.dsi.util.FastRandom;
 
 /**
  * Parses lines to data records and performs any data record preprocessing that can be done in parallel. Preprocessing
@@ -109,6 +112,15 @@ class DataParserThread implements Runnable
         final List<RequestProcessingRule> requestProcessingRules = config.getRequestProcessingRules();
         final boolean removeIndexes = config.getRemoveIndexesFromRequestNames();
 
+        final double SAMPLELIMIT = 1 / ((double) config.dataSampleFactor);
+        final int SAMPLEFACTOR = config.dataSampleFactor;
+        final FastRandom random = new FastRandom(98765111L);
+
+        final SparseBitSet allTimeIndex = new SparseBitSet();
+        final SparseBitSet actionTimeIndex = new SparseBitSet();
+
+        final SimpleArrayList<XltCharBuffer> csvParseResultBuffer = new SimpleArrayList<>(32);
+        
         while (true)
         {
             try
@@ -117,7 +129,7 @@ class DataParserThread implements Runnable
                 final DataChunk chunk = dispatcher.retrieveReadData();
 
                 final List<XltCharBuffer> lines = chunk.getLines();
-
+                
                 final String agentName = chunk.getAgentName();
                 final String testCaseName = chunk.getTestCaseName();
                 final String userNumber = chunk.getUserNumber(); 
@@ -127,67 +139,103 @@ class DataParserThread implements Runnable
 
                 final long _fromTime = fromTime;
                 final long _toTime = toTime;
+                
+                int droppedLines = 0;
 
                 // parse the chunk of lines and preprocess the results
-                final PostprocessedDataContainer postProcessedData = new PostprocessedDataContainer(lines.size());
+                final PostprocessedDataContainer postProcessedData = new PostprocessedDataContainer(lines.size(), SAMPLEFACTOR);
 
                 int lineNumber = chunk.getBaseLineNumber();
 
                 final int size = lines.size();
+
                 for (int i = 0; i < size; i++)
                 {
                     Data data = null;
-                    
+
                     try
                     {
                         // parse the data record initially
-                        data = dataRecordFactory.createStatistics(lines.get(i));
+                        final XltCharBuffer line = lines.get(i);
+                        data = dataRecordFactory.createStatistics(line);
+                        
+                        csvParseResultBuffer.clear();
+                        data.baseValuesFromCSV(csvParseResultBuffer, line);
                         
                         final long time = data.getTime();
+                        
                         if (time < _fromTime || time > _toTime)
                         {
                             continue;
                         }
                         
+                        if (SAMPLEFACTOR > 1)
+                        {
+                            // never drop Transactions
+                            if (!(data instanceof TransactionData))
+                            {
+                                final SparseBitSet timeIndex = data instanceof ActionData ? actionTimeIndex : allTimeIndex;
+                                
+                                // see if we have data at this second already
+                                final int sec = (int) (data.getTime() * 0.001);
+                                if (timeIndex.get(sec))
+                                {
+                                    // ok, we already have something... see if we want to drop it
+                                    if (random.nextDoubleFast() > SAMPLELIMIT)
+                                    {
+                                        droppedLines++;
+                                        continue;
+                                    }
+                                }
+                                else
+                                {
+                                    // mark that this second has a value
+                                    timeIndex.set(sec);
+                                }
+                            }
+                        }
+
                         // finish it
-                        data.fromCSV();
+                        data.fromCSV(csvParseResultBuffer);
                     }
                     catch (final Exception ex)
                     {
                         final String msg = String.format("Failed to parse data record at line %,d in file '%s': %s\nLine is: ", lineNumber, file, ex, lines.get(i).toString());
                         LOG.error(msg);
                         ex.printStackTrace();
-                        
+
                         continue;
                     }
-                    
+
                     if (data != null)
                     {
-                            data = applyDataAdjustments(data, agentName, testCaseName, userNumber,
-                                                        collectActionNames, chunk, adjustTimerName);
+                        data = applyDataAdjustments(data, agentName, testCaseName, userNumber, collectActionNames, chunk, adjustTimerName);
 
-                            if (data instanceof RequestData)
+                        if (data instanceof RequestData)
+                        {
+                            final RequestData result = postprocess((RequestData) data, requestProcessingRules, removeIndexes);
+                            if (result != null) 
                             {
-                                final RequestData result = postprocess((RequestData) data, requestProcessingRules, removeIndexes);
-                                if (result != null) 
-                                {
-                                    postProcessedData.add(result);
-                                }
+                                postProcessedData.add(result);
                             }
-                            else
-                            {
-                                // get us a hashcode for later while the cache is warm
-                                // for RequestData, we did that already
-                                data.getName().hashCode();
-                                postProcessedData.add(data);
-                            }
+                        }
+                        else
+                        {
+                            // get us a hashcode for later while the cache is warm
+                            // for RequestData, we did that already
+                            data.getName().hashCode();
+                            postProcessedData.add(data);
+                        }
                     }
 
                     lineNumber++;
                 }
 
                 // deliver the chunk of parsed data records
+                postProcessedData.droppedLines = droppedLines;
                 dispatcher.addPostprocessedData(postProcessedData);
+                
+//                System.out.println(String.format("Dropped %s of %s", droppedLines, size));
             }
             catch (final InterruptedException e)
             {
@@ -289,65 +337,9 @@ class DataParserThread implements Runnable
         // ok, we processed all rules for this dataset, get us the final hashcode for the name, because we need that later
         // here the cache is likely still hot, so this is less expensive
         requestData.getName().hashCode();
-        
+
         return requestData;
     }
 
-    public static class PostprocessedDataContainer
-    {
-        private final List<Data> data;
-
-        /**
-         * Creation time of last data record.
-         */
-        private long maximumTime = 0;
-
-        /**
-         * Creation time of first data record.
-         */
-        private long minimumTime = Long.MAX_VALUE;
-
-
-        PostprocessedDataContainer(final int size)
-        {
-            data = new SimpleArrayList<>(size);
-        }
-
-        public List<Data> getData()
-        {
-            return data;
-        }
-
-        public void add(final Data d)
-        {
-            data.add(d);
-
-            // maintain statistics
-            final long time = d.getTime();
-
-            minimumTime = Math.min(minimumTime, time);
-            maximumTime = Math.max(maximumTime, time);
-        }
-
-        /**
-         * Returns the maximum time.
-         *
-         * @return maximum time
-         */
-        public final long getMaximumTime()
-        {
-            return maximumTime;
-        }
-
-        /**
-         * Returns the minimum time.
-         *
-         * @return minimum time
-         */
-        public final long getMinimumTime()
-        {
-            return (minimumTime == Long.MAX_VALUE) ? 0 : minimumTime;
-        }
-    }
 
 }

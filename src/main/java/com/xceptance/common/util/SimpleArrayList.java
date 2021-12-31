@@ -200,8 +200,7 @@ public class SimpleArrayList<T> implements List<T>
     @Override
     public void clear()
     {
-        // TODO Auto-generated method stub
-        
+        size = 0;
     }
 
     @Override

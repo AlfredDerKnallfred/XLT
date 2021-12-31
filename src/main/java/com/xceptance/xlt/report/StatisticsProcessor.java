@@ -23,9 +23,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.xceptance.xlt.api.engine.Data;
 import com.xceptance.xlt.api.report.ReportProvider;
-import com.xceptance.xlt.report.DataParserThread.PostprocessedDataContainer;
 
 /**
  * Processes parsed data records. Processing means passing a data record to all configured report providers. Since data
@@ -87,7 +85,8 @@ class StatisticsProcessor
 
     /**
      * Take the post processed data and put it into the statitics machinery to
-     * capture the final data points. 
+     * capture the final data points. Does use the same threads as before, not a different pool
+     * hence better cache utilization.
      * 
      * @param data a chunk of post processed data for final statitics gathering
      */
@@ -96,28 +95,26 @@ class StatisticsProcessor
         // get your own list
         final Deque<ReportProvider> providerList = new ArrayDeque<>(reportProviders);
 
-        /**
-         * Create a task for each report provider and the full data set
-         */
-        final List<Data> data = dataContainer.getData();
+        // run as long as we have not all data put into the report providers
         while (providerList.isEmpty() == false)
         {
             ReportProvider provider = null;
-        
+
             int attemptsBeforeYielding = providerList.size();
             do 
             {
                 provider = providerList.pollFirst();
                 final boolean wasLocked = provider.lock();
-                
+
+                // if another thread is in that provider, put it back and try again
                 if (wasLocked == false)
                 {
                     providerList.addLast(provider);
                     provider = null;
-                    
+
                     if (attemptsBeforeYielding == 0)
                     {
-                        attemptsBeforeYielding = 9;
+                        attemptsBeforeYielding = providerList.size();
                         Thread.yield(); 
                     }
                     else
@@ -127,10 +124,10 @@ class StatisticsProcessor
                 }
             }
             while (provider == null);
-                
+
             try
             {
-                provider.processAll(data);
+                provider.processAll(dataContainer);
             }
             catch (final Throwable t)
             {
@@ -139,7 +136,7 @@ class StatisticsProcessor
             finally
             {
                 provider.unlock();
-                attemptsBeforeYielding = 3; 
+                attemptsBeforeYielding = providerList.size(); 
             }
         }
 

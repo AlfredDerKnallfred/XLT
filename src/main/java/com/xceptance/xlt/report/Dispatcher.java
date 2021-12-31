@@ -20,7 +20,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.xceptance.common.util.SynchronizingCounter;
-import com.xceptance.xlt.report.DataParserThread.PostprocessedDataContainer;
 
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;

@@ -167,6 +167,7 @@ public class ReportGeneratorConfiguration extends AbstractConfiguration implemen
     private static final String PROP_STATISTICS_THREAD_COUNT = PROP_PREFIX + "statistics.threads";
     private static final String PROP_THREAD_QUEUE_SIZE = PROP_PREFIX + "queue.bucketsize";
     private static final String PROP_THREAD_QUEUE_LENGTH = PROP_PREFIX + "queue.length";
+    private static final String PROP_DATA_SAMPLE_FACTOR = PROP_PREFIX + "data.sampleFactor";
     
     private static final String PROP_TRANSFORMATIONS_PREFIX = PROP_PREFIX + "transformations.";
 
@@ -248,6 +249,8 @@ public class ReportGeneratorConfiguration extends AbstractConfiguration implemen
     public final int parserThreadCount;
     public final int threadQueueBucketSize;
     public final int threadQueueLength;
+    
+    public final int dataSampleFactor;
 
     private final ChartScale chartScaleMode;
 
@@ -418,6 +421,8 @@ public class ReportGeneratorConfiguration extends AbstractConfiguration implemen
         readerThreadCount = Math.max(1, getIntProperty(PROP_READER_THREAD_COUNT, Runtime.getRuntime().availableProcessors()));
         parserThreadCount = Math.max(1, getIntProperty(PROP_PARSER_THREAD_COUNT, Runtime.getRuntime().availableProcessors()));
 
+        dataSampleFactor = Math.max(1, getIntProperty(PROP_DATA_SAMPLE_FACTOR, 1));
+        
         threadQueueBucketSize = Math.max(1, getIntProperty(PROP_THREAD_QUEUE_SIZE, Dispatcher.DEFAULT_QUEUE_CHUNK_SIZE));
         threadQueueLength = Math.max(1, getIntProperty(PROP_THREAD_QUEUE_LENGTH, Dispatcher.DEFAULT_QUEUE_LENGTH));
 

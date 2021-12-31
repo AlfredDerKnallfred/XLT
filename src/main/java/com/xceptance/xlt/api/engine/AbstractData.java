@@ -21,6 +21,7 @@ import java.util.List;
 import com.xceptance.common.lang.ParseNumbers;
 import com.xceptance.common.util.CsvUtils;
 import com.xceptance.common.util.CsvUtilsDecode;
+import com.xceptance.common.util.SimpleArrayList;
 import com.xceptance.common.util.XltCharBuffer;
 
 /**
@@ -56,11 +57,6 @@ public abstract class AbstractData implements Data
     private String agentName;
 
     /**
-     * Holds the partially parsed state, don't rely on it, this is here for speed, not beauty
-     */
-    private List<XltCharBuffer> fields;
-    
-    /**
      * Creates a new AbstractData object and gives it the specified name and type code.
      * 
      * @param name
@@ -89,19 +85,19 @@ public abstract class AbstractData implements Data
      * {@inheritDoc}
      */
     @Override
-    public final void baseValuesFromCSV(final XltCharBuffer s)
+    public final void baseValuesFromCSV(final SimpleArrayList<XltCharBuffer> result, final XltCharBuffer s)
     {
-        fields = CsvUtilsDecode.parse(s, DELIMITER);
-        parseBaseValues(fields);
+        CsvUtilsDecode.parse(result, s, DELIMITER);;
+        parseBaseValues(result);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final void fromCSV()
+    public final void fromCSV(final SimpleArrayList<XltCharBuffer> result)
     {
-        parseValues(fields);
+        parseValues(result);
     }
     
     /**

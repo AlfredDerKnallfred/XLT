@@ -15,9 +15,8 @@
  */
 package com.xceptance.xlt.api.report;
 
-import java.util.List;
-
 import com.xceptance.xlt.api.engine.Data;
+import com.xceptance.xlt.report.PostprocessedDataContainer;
 
 /**
  * The {@link ReportProvider} defines the interface that custom report providers must implement to take part in report
@@ -87,7 +86,7 @@ public interface ReportProvider extends ReportCreator
      */
     public void processDataRecord(Data data);
 
-    public void processAll(final List<Data> data);
+    public void processAll(final PostprocessedDataContainer dataContainer);
     
     /**
      * Sets the report provider's configuration. Use the configuration object to get access to general as well as

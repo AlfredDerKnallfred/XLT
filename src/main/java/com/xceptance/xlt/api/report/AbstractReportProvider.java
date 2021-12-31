@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.xceptance.xlt.api.engine.Data;
+import com.xceptance.xlt.api.engine.TransactionData;
+import com.xceptance.xlt.report.PostprocessedDataContainer;
 
 /**
  * The {@link AbstractReportProvider} class provides common functionality of a typical report provider.
@@ -69,12 +71,26 @@ public abstract class AbstractReportProvider implements ReportProvider
         locked.set(false);
     }
     
-    public void processAll(final List<Data> data)
+    public void processAll(final PostprocessedDataContainer dataContainer)
     {
+        final List<Data> data = dataContainer.data;
         int size = data.size();
-        for (int d = 0; d < size; d++)
+        int sampleFactor = dataContainer.sampleFactor;
+        int droppedLines = dataContainer.droppedLines;
+
+        for (int i = 0; i < size; i++)
         {
-            processDataRecord(data.get(d));
+            final Data d = data.get(i);
+            processDataRecord(d);
+            
+            if (droppedLines > 0 && !(d instanceof TransactionData))
+            {
+                for (int y = 1; y < sampleFactor; y++)
+                {
+                    processDataRecord(d);
+                }
+                droppedLines--;
+            }
         }
     }
 }

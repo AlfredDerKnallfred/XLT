@@ -252,6 +252,7 @@ public class RequestProcessingRule
         {
             final AbstractRequestFilter filter = requestFilters[i];
             filterStates[i] = filter.appliesTo(requestData);
+            
             if (filterStates[i] == null)
             {
                 // return early since one of the filters did *not* apply

@@ -36,7 +36,7 @@ public class IntLowPrecisionValueSet
     /**
      * The default number of buckets.
      */
-    private static int DEFAULT_BUCKET_COUNT = 128;
+    private static int DEFAULT_BUCKET_COUNT = 256;
 
     /**
      * Sets the default number of buckets for new {@link IntLowPrecisionValueSet} objects.

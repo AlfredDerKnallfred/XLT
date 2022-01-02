@@ -92,6 +92,12 @@ class StatisticsProcessor
      */
     public void process(final PostprocessedDataContainer dataContainer)
     {
+        // it might be empty when filtered
+        if (dataContainer.data.size() == 0)
+        {
+            return;
+        }
+        
         // get your own list
         final Deque<ReportProvider> providerList = new ArrayDeque<>(reportProviders);
 
@@ -143,6 +149,8 @@ class StatisticsProcessor
         // get the max and min
         synchronized (this)
         {
+//            System.out.println(String.format("%s, %s - container: %s, %s", minimumTime, maximumTime, dataContainer.getMinimumTime(), dataContainer.getMaximumTime()));
+
             minimumTime = Math.min(minimumTime, dataContainer.getMinimumTime());
             maximumTime = Math.max(maximumTime, dataContainer.getMaximumTime());
         }

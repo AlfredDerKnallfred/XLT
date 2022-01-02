@@ -234,8 +234,6 @@ class DataParserThread implements Runnable
                 // deliver the chunk of parsed data records
                 postProcessedData.droppedLines = droppedLines;
                 dispatcher.addPostprocessedData(postProcessedData);
-                
-//                System.out.println(String.format("Dropped %s of %s", droppedLines, size));
             }
             catch (final InterruptedException e)
             {

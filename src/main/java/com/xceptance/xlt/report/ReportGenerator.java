@@ -315,6 +315,7 @@ public class ReportGenerator
         fromTime = timeBoundaries[0];
         toTime = timeBoundaries[1];
 
+        
         printStartAndEndTime(fromTime, toTime);
         if (toTime <= fromTime)
         {

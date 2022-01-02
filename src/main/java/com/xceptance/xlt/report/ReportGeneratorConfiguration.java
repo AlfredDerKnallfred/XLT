@@ -240,7 +240,7 @@ public class ReportGeneratorConfiguration extends AbstractConfiguration implemen
     private long maximumChartTime;
 
     private long minimumChartTime;
-
+    
     private boolean noCharts;
 
     private boolean noAgentCharts;
@@ -851,7 +851,7 @@ public class ReportGeneratorConfiguration extends AbstractConfiguration implemen
     {
         this.minimumChartTime = minimumChartTime;
     }
-
+    
     /**
      * Sets the new value of the 'reportDirectory' attribute.
      *

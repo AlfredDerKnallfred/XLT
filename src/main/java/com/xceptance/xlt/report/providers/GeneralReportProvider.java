@@ -169,7 +169,7 @@ public class GeneralReportProvider extends AbstractReportProvider
 
         final long testStartTime = config.getChartStartTime();
         final long testEndTime = config.getChartEndTime();
-
+        
         report.startTime = new Date(testStartTime);
         report.endTime = new Date(testEndTime);
         report.duration = Math.round((testEndTime - testStartTime) / 1000.0F);

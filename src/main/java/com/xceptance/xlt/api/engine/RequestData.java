@@ -160,11 +160,6 @@ public class RequestData extends TimerData
      * one IP address, they will be stored separated by a '|' character.
      */
     private String ipAddresses;
-
-    /**
-     * Used for later processing of merge rules as a flag to ensure proper stopping of rule processing
-     */
-    private boolean stopMergeRuleProcessing;
     
     /**
      * Creates a new RequestData object.
@@ -455,8 +450,8 @@ public class RequestData extends TimerData
     public void setContentType(final String contentType)
     {
         this.contentType = XltCharBuffer.valueOf(contentType);
-        this.contentType.hashCode();
     }
+    
     public void setContentType(final XltCharBuffer contentType)
     {
         this.contentType = contentType;

@@ -97,7 +97,7 @@ public class ValueSet
     public void addOrUpdateValue(final long time, final int value)
     {
         // get the corresponding second
-        final long second = time / 1000;
+        final long second = time / 1000L;
 
         // check whether this is the first value added
         if (valueCount == 0)

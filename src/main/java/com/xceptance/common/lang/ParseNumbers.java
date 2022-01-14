@@ -1,9 +1,22 @@
+/*
+ * Copyright (c) 2005-2022 Xceptance Software Technologies GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.xceptance.common.lang;
 
-import com.xceptance.common.util.XltCharBuffer;
-
 /**
- * This is a small helper class for parsing strings and converting them into int, long, and double. This implementation is optimized for
+ * This is a small helper class for parsing char sequences and converting them into int, long, and double. This implementation is optimized for
  * speed not functionality. It is only able to parse plain numbers with base 10, e.g. 100828171. In case of parsing problems we will fall
  * back to the JDK but will lose the speed advantage of course. 
  * 
@@ -25,7 +38,7 @@ public final class ParseNumbers
      * @return the converted chars as long
      * @throws java.lang.NumberFormatException
      */
-    public static long parseLong(final XltCharBuffer s)
+    public static long parseLong(final CharSequence s)
     {
         // no string
         if (s == null)
@@ -42,7 +55,7 @@ public final class ParseNumbers
         }
 
         // that is safe, we already know that we are > 0
-        final int digit = s.get(0);
+        final int digit = s.charAt(0);
 
         // turn the compare around to allow the compiler and cpu
         // to run the next code most of the time
@@ -55,7 +68,7 @@ public final class ParseNumbers
 
         for (int i = 1; i < length; i++)
         {
-            final int d = s.get(i);
+            final int d = s.charAt(i);
             if (d < '0' || d > '9')
             {
                 return Long.parseLong(s.toString());
@@ -76,7 +89,7 @@ public final class ParseNumbers
      * @return the converted string as int
      * @throws java.lang.NumberFormatException
      */
-    public static int parseInt(final XltCharBuffer s)
+    public static int parseInt(final CharSequence s)
     {
         // no string
         if (s == null)
@@ -93,7 +106,7 @@ public final class ParseNumbers
         }
 
         // that is safe, we already know that we are > 0
-        final int digit = s.get(0);
+        final int digit = s.charAt(0);
 
         // turn the compare around to allow the compiler and cpu
         // to run the next code most of the time
@@ -106,7 +119,7 @@ public final class ParseNumbers
 
         for (int i = 1; i < length; i++)
         {
-            final int d = s.get(i);
+            final int d = s.charAt(i);
             if (d < '0' || d > '9')
             {
                 return Integer.parseInt(s.toString());
@@ -125,11 +138,11 @@ public final class ParseNumbers
      * We also drop negative numbers and fallback to Double.parseDouble. 
      * 
      * @param s
-     *            the string to parse
+     *            the characters to parse
      * @return the converted string as double
      * @throws java.lang.NumberFormatException
      */
-    public static double parseDouble(final XltCharBuffer s)
+    public static double parseDouble(final CharSequence s)
     {
         // no string
         if (s == null)
@@ -146,7 +159,7 @@ public final class ParseNumbers
         }
 
         // that is safe, we already know that we are > 0
-        final int digit = s.get(0);
+        final int digit = s.charAt(0);
 
         // turn the compare around to allow the compiler and cpu
         // to run the next code most of the time
@@ -161,7 +174,7 @@ public final class ParseNumbers
 
         for (int i = 1; i < length; i++)
         {
-            final int d = s.get(i);
+            final int d = s.charAt(i);
             if (d == '.')
             {
                 decimalPos = i;

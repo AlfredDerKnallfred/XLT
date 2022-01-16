@@ -38,7 +38,7 @@ public class ParseBoolean
 		final char u = c.charAt(2);
 		final char e = c.charAt(3);
 		
-		// fastpath and slowpath
+		// fastpath
 		final boolean b1 = (t == 't' & r == 'r' & u == 'u' & e == 'e');
 		
 		// slowpath will only be taken when needed, expected most true/false char buffers to be lowercase only

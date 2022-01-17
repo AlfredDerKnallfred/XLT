@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005-2020 Xceptance Software Technologies GmbH
+ * Copyright (c) 2005-2021 Xceptance Software Technologies GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class ThrowableUtilsTest
             {
                 new StackTraceElement(java.lang.Object.class.getName(), "foo1", "bar1", 1),
                 new StackTraceElement(java.lang.Object.class.getName(), "foo2", "bar2", 2),
-                new StackTraceElement(sun.reflect.Reflection.class.getName(), "foo3", "bar3", 3),
+//                new StackTraceElement(sun.reflect.Reflection.class.getName(), "foo3", "bar3", 3),
                 new StackTraceElement(java.lang.reflect.Array.class.getName(), "foo4", "bar4", 4),
                 new StackTraceElement("org.junit.runners.model.FrameworkMethod$1.runReflectiveCall", "foo5", "bar5", 5)
             };
@@ -96,7 +96,7 @@ public class ThrowableUtilsTest
             {
                 new StackTraceElement(java.lang.Object.class.getName(), "foo1", "bar1", 1),
                 new StackTraceElement(java.lang.Object.class.getName(), "foo2", "bar2", 2),
-                new StackTraceElement(sun.reflect.Reflection.class.getName(), "foo3", "bar3", 3),
+//                new StackTraceElement(sun.reflect.Reflection.class.getName(), "foo3", "bar3", 3),
                 new StackTraceElement(java.lang.reflect.Array.class.getName(), "foo4", "bar4", 4),
                 new StackTraceElement("org.junit.runners.model.FrameworkMethod$1.runReflectiveCall", "foo5", "bar5", 5)
             };

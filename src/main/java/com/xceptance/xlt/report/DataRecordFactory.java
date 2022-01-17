@@ -18,7 +18,6 @@ package com.xceptance.xlt.report;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
-import com.xceptance.common.util.SimpleArrayList;
 import com.xceptance.common.util.XltCharBuffer;
 import com.xceptance.xlt.api.engine.Data;
 
@@ -34,6 +33,10 @@ public class DataRecordFactory
      * The registered data handlers per Data(Record) type. 
      */
     private final Constructor<? extends Data> ctrs[];
+    
+    /**
+     * The offset of the characters in that array aka A-Z, needs offset A
+     */
     private final int offset;
 
     /**
@@ -45,6 +48,8 @@ public class DataRecordFactory
     {
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
+        
+        // determine the upper and lower limit for a nice efficient array
         for (final Map.Entry<String, Class<? extends Data>> entry : dataClasses.entrySet())
         {
             char c = entry.getKey().charAt(0);
@@ -59,11 +64,11 @@ public class DataRecordFactory
         for (final Map.Entry<String, Class<? extends Data>> entry : dataClasses.entrySet())
         {
             final int typeCode = entry.getKey().charAt(0);
-            Constructor<? extends Data> clazz;
+            
             try
             {
-                clazz = entry.getValue().getConstructor();
-                registerStatisticsClass(clazz, typeCode);
+                final Constructor<? extends Data> clazz = entry.getValue().getConstructor();
+                ctrs[typeCode - offset] = clazz;
             }
             catch (NoSuchMethodException e)
             {
@@ -79,18 +84,8 @@ public class DataRecordFactory
     }
 
     /**
-     * Register a new handler under its type code
+     * Determine the record type, but don't parse it yet
      * 
-     * @param c
-     * @param typeCode
-     */
-    private void registerStatisticsClass(final Constructor<? extends Data> c, final int typeCode)
-    {
-        ctrs[typeCode - offset] = c;
-    }
-
-    /**
-     * Determine the record time, but don't parse it yet
      * @param s the csv line to parse
      * @return the parsed csv line as fitting data object
      * @throws Exception
@@ -98,7 +93,7 @@ public class DataRecordFactory
     public Data createStatistics(final XltCharBuffer src) throws Exception
     {
         // create the statistics object
-        final Constructor<? extends Data> c = ctrs[src.get(0) - offset];
+        final Constructor<? extends Data> c = ctrs[src.charAt(0) - offset];
         final Data data = c.newInstance();
 
         return data;

@@ -124,7 +124,7 @@ public final class CsvUtils
      *            the plain fields
      * @return the CSV-encoded data record
      */
-    public static String encode(final String[] fields)
+    public static String encode(final List<String> fields)
     {
         return encode(fields, COMMA);
     }
@@ -238,16 +238,17 @@ public final class CsvUtils
      *            the field separator to use
      * @return the CSV-encoded data record
      */
-    public static String encode(final String[] fields, final char fieldSeparator)
+    public static String encode(final List<String> fields, final char fieldSeparator)
     {
-        // parameter validation
-        ParameterCheckUtils.isNotNullOrEmpty(fields, "fields");
-
         final StringBuilder result = new StringBuilder(256);
         boolean isFirstField = true;
 
-        for (String field : fields)
+        final int length = fields.size();
+        
+        for (int i = 0; i < length; i++)
         {
+            final String field = fields.get(i);
+            
             if (field == null)
             {
                 throw new IllegalArgumentException("Array entry must not be null.");
@@ -264,8 +265,7 @@ public final class CsvUtils
             }
 
             // now add the encoded field
-            field = encodeField(field, fieldSeparator);
-            result.append(field);
+            result.append(encodeField(field, fieldSeparator));
         }
 
         return result.toString();

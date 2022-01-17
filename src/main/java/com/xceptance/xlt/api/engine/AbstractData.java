@@ -196,8 +196,7 @@ public abstract class AbstractData implements Data
     @Override
     public final String toCSV()
     {
-        final List<String> fieldList = addValues();
-        final String[] fields = fieldList.toArray(new String[fieldList.size()]);
+        final List<String> fields = addValues();
 
         return CsvUtils.encode(fields, DELIMITER);
     }
@@ -244,7 +243,7 @@ public abstract class AbstractData implements Data
         }
 
         // check the type code
-        if (values.get(0).get(0) == typeCode)
+        if (values.get(0).charAt(0) == typeCode)
         {
             // read and check the values
             name = values.get(1).toString();

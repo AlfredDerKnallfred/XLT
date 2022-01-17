@@ -1,10 +1,24 @@
+/*
+ * Copyright (c) 2005-2022 Xceptance Software Technologies GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.xceptance.common.util;
 
 import java.text.ParseException;
 
 /**
- * The {@link CsvUtilsDecode} class provides helper methods to encode and decode values to/from the CSV format. Note that we
- * define the "C" in "CSV" to stand for "comma", so other characters are not allowed as field separator.
+ * The {@link CsvUtilsDecode} class provides helper methods to encode and decode values to/from the CSV format.
  * 
  * v514
  */
@@ -19,16 +33,6 @@ public final class CsvUtilsDecode
      * Character constant representing a double quote.
      */
     private static final char QUOTE_CHAR = '"';
-
-    /**
-     * Character constant representing a line feed.
-     */
-    private static final char LF = '\n';
-
-    /**
-     * Character constant representing a carriage return.
-     */
-    private static final char CR = '\r';
 
     /**
      * Default constructor. Declared private to prevent external instantiation.
@@ -49,9 +53,12 @@ public final class CsvUtilsDecode
         return parse(new SimpleArrayList<>(32), XltCharBuffer.valueOf(s), COMMA);
     }
 
+    // our bit flags for the parser
+    @SuppressWarnings("unused")
     private static final int NONE = 0;
     private static final int IN_QUOTES = 1;
     private static final int START_MODE = 2;
+    @SuppressWarnings("unused")
     private static final int SEPARATOR_EXPECTED = 4;
     private static final int LAST_WAS_SEPARATOR = 8;
     private static final int JUST_LEFT_QUOTES = 16;    
@@ -60,11 +67,9 @@ public final class CsvUtilsDecode
     /**
      * Encodes the given fields to a CSV-encoded data record using the given field separator.
      * 
-     * @param list a list to append to, for memory efficency
-     * @param s
-     *            the plain fields
-     * @param fieldSeparator
-     *            the field separator to use
+     * @param list a list to append to, for memory efficiency, we hand one in instead of creating our own
+     * @param src the buffer to read from
+     * @param fieldSeparator the field separator to use
      * @return the CSV-encoded data record
      * @throws ParseException 
      */
@@ -80,7 +85,7 @@ public final class CsvUtilsDecode
         Main:
         while (pos < size)
         {
-            final char c = src.get(pos);
+            final char c = src.charAt(pos);
             
             state = state | COPY_REST;
             state = state & ~LAST_WAS_SEPARATOR;
@@ -105,7 +110,7 @@ public final class CsvUtilsDecode
                 InQuotes:
                 while (pos < size)
                 {
-                    final char c2 = src.get(pos);
+                    final char c2 = src.charAt(pos);
                     
                     if (c2 == QUOTE_CHAR)
                     {
@@ -212,7 +217,7 @@ public final class CsvUtilsDecode
         }
         else if ((state & LAST_WAS_SEPARATOR) == LAST_WAS_SEPARATOR)
         {
-            // we had a seperator at the end, so we have an empty string to add
+            // we had a separator at the end, so we have an empty string to add
             result.add(XltCharBuffer.empty());
         }
         else if (size == 0)

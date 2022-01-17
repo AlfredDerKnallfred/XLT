@@ -799,12 +799,6 @@ public class OpenStringBuilder implements CharSequence, Appendable, Serializable
      * @return this, to enable chaining
      */
     public OpenStringBuilder append(final char[] chars, final int startIndex, final int length) {
-//        for (char c : chars)
-//        {
-//            System.out.print((int) c);
-//        }
-//        System.out.println("=============");
-        
         if (chars == null) {
             return appendNull();
         }

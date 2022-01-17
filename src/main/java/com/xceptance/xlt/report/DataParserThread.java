@@ -114,8 +114,11 @@ class DataParserThread implements Runnable
 
         final double SAMPLELIMIT = 1 / ((double) config.dataSampleFactor);
         final int SAMPLEFACTOR = config.dataSampleFactor;
+        
+        // some fix random sequence that is fast and always the same, this might change in the future
         final FastRandom random = new FastRandom(98765111L);
 
+        // ensure that we are not killing everything
         final SparseBitSet allTimeIndex = new SparseBitSet();
         final SparseBitSet actionTimeIndex = new SparseBitSet();
 
@@ -155,20 +158,26 @@ class DataParserThread implements Runnable
 
                     try
                     {
-                        // parse the data record initially
+                        // parse the data record for minimal data
                         final XltCharBuffer line = lines.get(i);
                         data = dataRecordFactory.createStatistics(line);
                         
-                        csvParseResultBuffer.clear();
+                        // we want to reuse that array because it is just temp transport and at the end, we will always
+                        // allocate it freshly and might also either allocate too much or have to grow it
+                        csvParseResultBuffer.clear(); 
+                        
+                        // get us the minimal data aka type and time
                         data.baseValuesFromCSV(csvParseResultBuffer, line);
                         
+                        // see if we have to keep it
                         final long time = data.getTime();
-                        
                         if (time < _fromTime || time > _toTime)
                         {
+                            // nope
                             continue;
                         }
                         
+                        // see if we are sampling data values
                         if (SAMPLEFACTOR > 1)
                         {
                             // never drop Transactions
@@ -195,7 +204,7 @@ class DataParserThread implements Runnable
                             }
                         }
 
-                        // finish it
+                        // finish parsing
                         data.fromCSV(csvParseResultBuffer);
                     }
                     catch (final Exception ex)
@@ -207,10 +216,12 @@ class DataParserThread implements Runnable
                         continue;
                     }
 
+                    // let's see if this data requires post processing aka filtering/merging
                     if (data != null)
                     {
                         data = applyDataAdjustments(data, agentName, testCaseName, userNumber, collectActionNames, chunk, adjustTimerName);
 
+                        // if this is request, filter it aka apply merge rules
                         if (data instanceof RequestData)
                         {
                             final RequestData result = postprocess((RequestData) data, requestProcessingRules, removeIndexes);
@@ -279,12 +290,15 @@ class DataParserThread implements Runnable
      * discarding requests.
      *
      * @param requestData
-     *            the request data record
+     *              the request data record
+     * @param requestProcessingRules 
+     *              the rules to apply
      * @param removeIndexesFromRequestNames 
      *              in case we want to clean the name too
+     *              
      * @return the processed request data record, or <code>null</code> if the data record is to be discarded
      */
-    private RequestData postprocess(RequestData requestData, 
+    private RequestData postprocess(final RequestData requestData, 
                                     final List<RequestProcessingRule> requestProcessingRules, 
                                     boolean removeIndexesFromRequestNames)
     {

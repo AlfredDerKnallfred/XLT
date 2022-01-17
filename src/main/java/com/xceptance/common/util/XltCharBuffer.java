@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2005-2022 Xceptance Software Technologies GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.xceptance.common.util;
 
 import java.util.Arrays;
@@ -8,21 +23,52 @@ import com.xceptance.common.lang.OpenStringBuilder;
 /**
  * This class does not implement the CharBuffer of the JDK, but uses the idea of a shared
  * character array with views. This is also a very unsafe implementation with as little
- * as possible bound checks to achieve the maximum speed possible.
+ * as possible boundary checks to achieve the maximum speed possible. To enhance use, we
+ * implement CharSequence and hence can also do regex with it now.
  * 
  * @author rschwietzke
  *
  */
 public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
 {
+    /**
+     * An empty static XltCharBuffer
+     */
     public static final XltCharBuffer EMPTY = new XltCharBuffer(new char[0]);
+    
+    /**
+     * Just a new line
+     */
     public static final XltCharBuffer NEWLINE = XltCharBuffer.valueOf("\n");
 
+    /**
+     * The internal buffer, it is shared!
+     */
     private final char[] src;
+    
+    /**
+     * Because we are here dealing with the view of an array, we need a start
+     * and a length.
+     */
     private final int from;
+    
+    /**
+     * The length of the view of the buffer
+     */
     private final int length;
+    
+    /**
+     * The hashcode. It is cached to avoid running the same operation again and 
+     * again. The hashcode is identical to a hashcode of a String with the same 
+     * content.
+     */
     private int hashCode;
 
+    /**
+     * New buffer from a raw char array
+     * 
+     * @param src a char array
+     */
     public XltCharBuffer(final char[] src)
     {
         this.src = src == null ? new char[0] : src;
@@ -30,11 +76,25 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         this.length = this.src.length;
     }
 
+    /**
+     * A new buffer from an open string builder, so we can directly 
+     * use its buffer and don't have to copy. This is highly unsafe, so 
+     * make sure you know what you are doing!
+     * 
+     * @param src an open string builder
+     */
     public XltCharBuffer(final OpenStringBuilder src)
     {
         this(src.getCharArray(), 0, src.length());
     }
 
+    /**
+     * A new buffer from a char array including a view port.
+     * 
+     * @param src the char array, if is is null, we fix that silently
+     * @param from from where to deliver the buffer
+     * @param length how long should the buffer be
+     */
     public XltCharBuffer(final char[] src, final int from, final int length)
     {
         this.src = src == null ? new char[0] : src;
@@ -42,14 +102,9 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         this.length = length;
     }
 
-    public char get(final int pos)
-    {
-        return src[from + pos];
-    }
-
     public char charAt(final int pos)
     {
-        return get(pos);
+        return src[from + pos];
     }
 
     public XltCharBuffer put(final int pos, final char c)
@@ -112,7 +167,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      */
     public char peakAhead(final int pos)
     {
-        return from + pos < length ? get(pos) : 0;
+        return from + pos < length ? charAt(pos) : 0;
     }
 
     public XltCharBuffer viewByLength(final int from, final int length)
@@ -297,6 +352,8 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         append(sb, s2);
         append(sb, s3);
 
+        // getCharArray does not create a copy, hence OpenStringBuilder from now on should not be used anymore, because it would modify
+        // the XltCharBuffer as well. Speed over luxury.
         return new XltCharBuffer(sb.getCharArray(), 0, sb.length());
     }
 

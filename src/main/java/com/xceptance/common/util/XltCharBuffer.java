@@ -102,11 +102,28 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         this.length = length;
     }
 
+    /**
+     * Return the character at a position. This code does not run any 
+     * checks in regards to pos being correct (>= 0, < length). This will
+     * automatically apply the view on the underlying array hence incorrect
+     * pos values might return something unexpectedly.
+     * 
+     * @param pos the position to return
+     * @return the character at this position.
+     */
     public char charAt(final int pos)
     {
         return src[from + pos];
     }
 
+    /**
+     * Set a character at this position. Similarly to charAt, this does not 
+     * check for correctness of pos in favor of speed.
+     * 
+     * @param pos the pos to write to 
+     * @param c the character to set
+     * @return this instance so put can be chained
+     */
     public XltCharBuffer put(final int pos, final char c)
     {
         src[from + pos] = c;
@@ -114,6 +131,13 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         return this;
     }
 
+    /**
+     * Splits up this sequence into sub-sequences at splitChar markers 
+     * excluding the marker
+     * 
+     * @param splitChar the split character
+     * @return a list of the sub-sequences
+     */
     public List<XltCharBuffer> split(final char splitChar)
     {
         final List<XltCharBuffer> result = new SimpleArrayList<>(10);
@@ -137,17 +161,24 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         return result;
     }
 
-    public XltCharBuffer replace(char c, String s)
+    /**
+     * Replace a character by a character sequence in this charbuffer. This will
+     * create a new char array backed charbuffer. 
+     * 
+     * @param c the character to search for 
+     * @param s the charsequence to insert instead of the character
+     * @return a new charbuffer with no references ot the old
+     */
+    public XltCharBuffer replace(final char c, final CharSequence s)
     {
-        final OpenStringBuilder result = new OpenStringBuilder(s.length() > 1 ? s.length() + 10 : s.length());
-        final char[] sChars = s.toCharArray();
+        final OpenStringBuilder result = new OpenStringBuilder(this.length() + s.length());
 
         for (int i = 0; i < this.length; i++)
         {
             final char cc = this.charAt(i);
             if (cc == c)
             {
-                result.append(sChars);
+                result.append(s);
             }
             else
             {

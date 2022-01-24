@@ -300,7 +300,7 @@ class DataParserThread implements Runnable
      */
     private RequestData postprocess(final RequestData requestData, 
                                     final List<RequestProcessingRule> requestProcessingRules, 
-                                    boolean removeIndexesFromRequestNames)
+                                    final boolean removeIndexesFromRequestNames)
     {
         // fix up the name first (Product.1.2 -> Product) if so configured
         // this can likely live in RequestData and act on XltCharBuffer instead String

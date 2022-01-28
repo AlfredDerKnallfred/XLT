@@ -312,6 +312,26 @@ public class OpenBitSet
     }
 
     /**
+     * Sets the bit at the specified index to the specified value.
+     * Added to make OpenBitSet more compatible with java.util.BitSet
+     *
+     * @param  bitIndex a bit index
+     * @param  value a boolean value to set
+     * @throws IndexOutOfBoundsException if the specified index is negative
+     */
+    public void set(int bitIndex, boolean value) 
+    {
+        if (value)
+        {
+           fastSet(bitIndex);
+        }
+        else
+        {
+            fastClear(bitIndex);
+        }
+    }
+    
+    /**
      * Sets a range of bits, expanding the set size if necessary
      *
      * @param startIndex

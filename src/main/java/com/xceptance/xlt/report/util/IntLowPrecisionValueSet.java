@@ -16,8 +16,9 @@
 package com.xceptance.xlt.report.util;
 
 
+import java.util.BitSet;
+
 import com.xceptance.common.util.ParameterCheckUtils;
-import com.xceptance.xlt.report.util.lucene.OpenBitSet;
 
 /**
  * A {@link IntLowPrecisionValueSet} stores any number of distinct integer values out of [0..{@link Integer#MAX_VALUE}]
@@ -54,7 +55,7 @@ public class IntLowPrecisionValueSet
     /**
      * The bit set representing the buckets.
      */
-    private final OpenBitSet bitSet;
+    private final BitSet bitSet;
 
     /**
      * The number of buckets.
@@ -86,7 +87,7 @@ public class IntLowPrecisionValueSet
         this.buckets = buckets;
 
         scale = 0;
-        bitSet = new OpenBitSet(this.buckets);
+        bitSet = new BitSet(this.buckets);
     }
 
     /**
@@ -115,7 +116,7 @@ public class IntLowPrecisionValueSet
         }
 
         // finally set the corresponding bit
-        bitSet.fastSet(value);
+        bitSet.set(value);
     }
 
     /**
@@ -246,15 +247,15 @@ public class IntLowPrecisionValueSet
         for (int i = 0; i < buckets; i += 2)
         {
             final int bitIndex = i >> 1; // / 2
-            final boolean bitValue = bitSet.fastGet(i) || bitSet.fastGet(i + 1);
+            final boolean bitValue = bitSet.get(i) || bitSet.get(i + 1);
 
             if (bitValue)
             {
-                bitSet.fastSet(bitIndex);
+                bitSet.set(bitIndex);
             }
             else
             {
-                bitSet.fastClear(bitIndex);
+                bitSet.clear(bitIndex);
             }
         }
 

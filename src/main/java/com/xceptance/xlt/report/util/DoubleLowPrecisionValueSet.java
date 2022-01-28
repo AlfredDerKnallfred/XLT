@@ -15,9 +15,9 @@
  */
 package com.xceptance.xlt.report.util;
 
-import java.util.BitSet;
-
 import org.apache.commons.lang3.ArrayUtils;
+
+import com.xceptance.xlt.report.util.lucene.OpenBitSet;
 
 /**
  * A {@link DoubleLowPrecisionValueSet} stores any number of distinct double values in a memory-efficient way, however,
@@ -52,7 +52,7 @@ public class DoubleLowPrecisionValueSet extends AbstractFixedSizeDoubleValueSet
     /**
      * The bit set representing the buckets.
      */
-    private final BitSet bitSet;
+    private final OpenBitSet bitSet;
 
     /**
      * Creates a {@link DoubleLowPrecisionValueSet} object with {@value DoubleLowPrecisionValueSet#DEFAULT_BUCKET_COUNT}
@@ -74,7 +74,7 @@ public class DoubleLowPrecisionValueSet extends AbstractFixedSizeDoubleValueSet
     {
         super(numberOfBuckets);
 
-        bitSet = new BitSet(numberOfBuckets);
+        bitSet = new OpenBitSet(numberOfBuckets);
     }
 
     /**
@@ -145,7 +145,7 @@ public class DoubleLowPrecisionValueSet extends AbstractFixedSizeDoubleValueSet
         }
         else
         {
-            final int size = bitSet.cardinality();
+            final int size = (int) bitSet.cardinality();
             values = new double[size];
 
             for (int i = 0, j = bitSet.nextSetBit(0); i < size; i++, j = bitSet.nextSetBit(j + 1))

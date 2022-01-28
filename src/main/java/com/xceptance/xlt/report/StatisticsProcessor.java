@@ -97,7 +97,7 @@ class StatisticsProcessor
         {
             return;
         }
-
+        
         // get your own list
         final Deque<ReportProvider> providerList = new ArrayDeque<>(reportProviders);
 
@@ -118,17 +118,10 @@ class StatisticsProcessor
                     providerList.addLast(provider);
                     provider = null;
 
-                    if (attemptsBeforeYielding < 3)
+                    if (attemptsBeforeYielding == 0)
                     {
-                        if (attemptsBeforeYielding == 0)
-                        {
-                            attemptsBeforeYielding = providerList.size();
-                            Thread.yield();
-                        }
-                        else
-                        {
-                            Thread.onSpinWait();
-                        }
+                        attemptsBeforeYielding = providerList.size();
+                        Thread.yield(); 
                     }
                     else
                     {
@@ -156,7 +149,7 @@ class StatisticsProcessor
         // get the max and min
         synchronized (this)
         {
-            //            System.out.println(String.format("%s, %s - container: %s, %s", minimumTime, maximumTime, dataContainer.getMinimumTime(), dataContainer.getMaximumTime()));
+//            System.out.println(String.format("%s, %s - container: %s, %s", minimumTime, maximumTime, dataContainer.getMinimumTime(), dataContainer.getMaximumTime()));
 
             minimumTime = Math.min(minimumTime, dataContainer.getMinimumTime());
             maximumTime = Math.max(maximumTime, dataContainer.getMaximumTime());

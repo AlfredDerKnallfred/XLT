@@ -93,16 +93,48 @@ public class XltCharBufferTest
     @Test
     public void viewByLength()
     {
-        final char[] src = "TestFo2".toCharArray();
-        final XltCharBuffer b = new XltCharBuffer(src);
+        var x = XltCharBuffer.valueOf("0123456");
 
-        Assert.assertEquals("", b.viewByLength(0, 0).toString());
-        Assert.assertEquals("T", b.viewByLength(0, 1).toString());
-        Assert.assertEquals("TestFo2", b.viewByLength(0, 7).toString());
-        Assert.assertEquals("2", b.viewByLength(6, 1).toString());
-        Assert.assertEquals("", b.viewByLength(6, 0).toString());
+        assertEquals(XltCharBuffer.valueOf(""), x.viewByLength(0, 0));
+        assertEquals(XltCharBuffer.valueOf("0"), x.viewByLength(0, 1));
+        assertEquals(XltCharBuffer.valueOf("01"), x.viewByLength(0, 2));
+        assertEquals(XltCharBuffer.valueOf("012"), x.viewByLength(0, 3));
+        assertEquals(XltCharBuffer.valueOf("0123"), x.viewByLength(0, 4));
+        assertEquals(XltCharBuffer.valueOf("01234"), x.viewByLength(0, 5));
+        assertEquals(XltCharBuffer.valueOf("012345"), x.viewByLength(0, 6));
+        assertEquals(XltCharBuffer.valueOf("0123456"), x.viewByLength(0, 7));
+
+        assertEquals(XltCharBuffer.valueOf("1"), x.viewByLength(1, 1));
+        assertEquals(XltCharBuffer.valueOf("123456"), x.viewByLength(1, 6));
+        assertEquals(XltCharBuffer.valueOf("6"), x.viewByLength(6, 1));
     }
 
+    @Test
+    public void viewByLength_viewByLength()
+    {
+        var x = XltCharBuffer.valueOf("0123456");
+
+        assertEquals(XltCharBuffer.valueOf(""), x.viewByLength(0, 1).viewByLength(0, 0));
+        
+        assertEquals(XltCharBuffer.valueOf("0"), x.viewByLength(0, 2).viewByLength(0, 1));
+        assertEquals(XltCharBuffer.valueOf("1"), x.viewByLength(0, 2)/*01*/.viewByLength(1, 1));
+
+        assertEquals(XltCharBuffer.valueOf("012"), x.viewByLength(0, 3).viewByLength(0, 3));
+        assertEquals(XltCharBuffer.valueOf("01"), x.viewByLength(0, 3).viewByLength(0, 2));
+        assertEquals(XltCharBuffer.valueOf("0"), x.viewByLength(0, 3).viewByLength(0, 1));
+
+        assertEquals(XltCharBuffer.valueOf( "1"), x.viewByLength(1, 3)/*123*/.viewByLength(0, 1));
+        assertEquals(XltCharBuffer.valueOf( "2"), x.viewByLength(1, 3)/*123*/.viewByLength(1, 1));
+        assertEquals(XltCharBuffer.valueOf( "3"), x.viewByLength(1, 3)/*123*/.viewByLength(2, 1));
+        assertEquals(XltCharBuffer.valueOf("23"), x.viewByLength(1, 3)/*123*/.viewByLength(1, 2));
+        assertEquals(XltCharBuffer.valueOf("123"), x.viewByLength(1, 3)/*123*/.viewByLength(0, 3));
+
+        assertEquals(XltCharBuffer.valueOf("45"), x.viewByLength(4, 3)/*456*/.viewByLength(0, 2));
+        
+        assertEquals(XltCharBuffer.valueOf("b"), XltCharBuffer.valueOf("abc").viewByLength(1, 1).viewByLength(0, 1));
+    }
+
+    
     @Test
     public void viewFromTo()
     {
@@ -250,5 +282,53 @@ public class XltCharBufferTest
             assertEquals(-1, a.compareTo(b));
             assertEquals(1, b.compareTo(a));
         }
+    }
+
+    @Test
+    public void substring_to()
+    {
+        {
+            var x1 = XltCharBuffer.valueOf("a").substring(0);
+            assertEquals(XltCharBuffer.valueOf("a"), x1);
+
+            var x2 = XltCharBuffer.valueOf("abc").viewByLength(0, 1).substring(0);
+            assertEquals(XltCharBuffer.valueOf("a"), x2);
+
+            var x3 = XltCharBuffer.valueOf("abc").viewByLength(1, 1);
+            x3 = x3.substring(0);
+            assertEquals(XltCharBuffer.valueOf("b"), x3);
+
+            var x4 = XltCharBuffer.valueOf("bca").viewByLength(2, 1).substring(0);
+            assertEquals(XltCharBuffer.valueOf("a"), x4);
+        }
+
+        {
+            var x1 = XltCharBuffer.valueOf("abc").substring(0);
+            assertEquals(XltCharBuffer.valueOf("abc"), x1);
+
+            var x2 = XltCharBuffer.valueOf("abc123").viewByLength(0, 3).substring(0);
+            assertEquals(XltCharBuffer.valueOf("abc"), x2);
+
+            var x3 = XltCharBuffer.valueOf("abc123").viewByLength(3, 3).substring(0);
+            assertEquals(XltCharBuffer.valueOf("123"), x3);
+
+            var x4 = XltCharBuffer.valueOf("abc123").viewByLength(2, 3).substring(0);
+            assertEquals(XltCharBuffer.valueOf("c12"), x4);
+        }
+
+        {
+            var x1 = XltCharBuffer.valueOf("abc").substring(1);
+            assertEquals(XltCharBuffer.valueOf("bc"), x1);
+
+            var x2 = XltCharBuffer.valueOf("abc123").viewByLength(0, 3).substring(1);
+            assertEquals(XltCharBuffer.valueOf("bc"), x2);
+
+            var x3 = XltCharBuffer.valueOf("abc123").viewByLength(3, 3).substring(1);
+            assertEquals(XltCharBuffer.valueOf("23"), x3);
+
+            var x4 = XltCharBuffer.valueOf("abc123").viewByLength(2, 3).substring(1);
+            assertEquals(XltCharBuffer.valueOf("12"), x4);
+        }
+
     }
 }

@@ -15,6 +15,7 @@
  */
 package com.xceptance.common.util;
 
+import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,10 +25,12 @@ import com.xceptance.common.lang.OpenStringBuilder;
  * This class does not implement the CharBuffer of the JDK, but uses the idea of a shared
  * character array with views. This is also a very unsafe implementation with as little
  * as possible boundary checks to achieve the maximum speed possible. To enhance use, we
- * implement CharSequence and hence can also do regex with it now.
+ * implement CharSequence and hence can also do regex with it now. It also features common
+ * string and striingbuffer methods to make it versatile and avoid the typical overhead 
+ * when doing conversions back and forth.
  * 
  * @author rschwietzke
- *
+ * @since 7.0
  */
 public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
 {
@@ -201,26 +204,61 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         return from + pos < length ? charAt(pos) : 0;
     }
 
+    /**    
+     * Returns a new buffer with a view on the current. No copy is made.
+     * No runtime checks
+     * 
+     * @param from start position
+     * @param length length of the view port
+     * @return a new buffer
+     */
     public XltCharBuffer viewByLength(final int from, final int length)
     {
-        return new XltCharBuffer(this.src, from, length);
+        var f = this.from + from;
+        return new XltCharBuffer(this.src, f, length);
     }
 
+    /**    
+     * Returns a new buffer with a view on the current. No copy is made.
+     * No runtime checks
+     * 
+     * @param from start position
+     * @param to end position
+     * @return a new buffer
+     */
     public XltCharBuffer viewFromTo(final int from, final int to)
     {
         return new XltCharBuffer(this.src, this.from + from, to - from);
     }
 
+    /**
+     * Creates a new buffer similar to a String.substring call
+     * @param from first position
+     * @param to last position
+     * @return
+     */
     public XltCharBuffer substring(final int from, final int to)
     {
         return viewFromTo(from, to);
     }
 
+    /**
+     * Creates a new buffer similar to a String.substring call from 
+     * a position till the end
+     * @param from first position
+     * @return
+     */    
     public XltCharBuffer substring(final int from)
     {
-        return viewFromTo(from, length());
+        return viewByLength(from, this.length - from);
     }
-
+    
+    /**
+     * Just returns an empty buffer. This is a static object and not
+     * a new buffer every time, so apply caution.
+     * 
+     * @return the empty buffer
+     */
     public static XltCharBuffer empty()
     {
         return EMPTY;
@@ -257,7 +295,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     }
 
     /**
-     * Append a string to a stringbuilder without an array copy operation
+     * Append a charbuffer to a stringbuilder without an array copy operation
      * 
      * @param target the target
      * @param src the source
@@ -265,13 +303,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      */
     private static OpenStringBuilder append(final OpenStringBuilder target, final XltCharBuffer src)
     {
-        final int length = src.length();
-        for (int i = 0; i < length; i++)
-        {
-            // because of JDK 11 compact strings, that is not perfect but we want to 
-            // avoid memory waste here and not cpu cycles... always a trade-off
-            target.append(src.charAt(i));
-        }
+        target.append(src.src, src.from, src.length);
 
         return target;
     }
@@ -279,9 +311,9 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     /**
      * Creates a new char buffer by merging strings
      * 
-     * @param s1
-     * @param s2
-     * @return
+     * @param s1 string 1
+     * @param s2 string 2
+     * @return the new charbuffer
      */
     public static XltCharBuffer valueOf(final String s1, final String s2)
     {
@@ -301,9 +333,9 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     /**
      * Creates a new char buffer by merging XltCharBuffers
      * 
-     * @param s1
-     * @param s2
-     * @return
+     * @param s1 buffer 1
+     * @param s2 buffer 2
+     * @return the new charbuffer
      */
     public static XltCharBuffer valueOf(final XltCharBuffer s1, final XltCharBuffer s2)
     {
@@ -433,6 +465,12 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         return String.valueOf(src, from, length);
     }
 
+    /**
+     * Returns a copy of the backing char array for the range of this buffer
+     * aka not more than needed 
+     * 
+     * @return a copy of the relevant portion of the backing array
+     */
     public char[] toCharArray()
     {
         final char[] target = new char[length];
@@ -541,11 +579,23 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         return -1;
     }
 
+    /**
+     * Search for the first occurrence of another buffer in this buffer
+     * 
+     * @param s the buffer to be search for
+     * @return the first found position or -1 if not found
+     */
     public int indexOf(final XltCharBuffer s) 
     {
         return indexOf(this.src, from, length, s.src, s.from, s.length, 0);
     }
 
+    /**
+     * Search for the first occurrence of another buffer in this buffer
+     * 
+     * @param s the buffer to be search for
+     * @return the first found position or -1 if not found
+     */
     public int indexOf(final XltCharBuffer s, final int fromIndex) 
     {
         return indexOf(this.src, from, length, s.src, s.from, s.length, fromIndex);

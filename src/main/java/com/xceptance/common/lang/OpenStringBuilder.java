@@ -798,46 +798,14 @@ public class OpenStringBuilder implements CharSequence, Appendable, Serializable
      *            the length to append, must be valid
      * @return this, to enable chaining
      */
-    public OpenStringBuilder append(final char[] chars, final int startIndex, final int length) {
-        if (chars == null) {
-            return appendNull();
-        }
-        if (startIndex < 0 || startIndex > chars.length) {
-            throw new StringIndexOutOfBoundsException("Invalid startIndex: " + length);
-        }
-        if (length < 0 || startIndex + length > chars.length) {
-            throw new StringIndexOutOfBoundsException("Invalid length: " + length);
-        }
-        if (length > 0) {
+    public OpenStringBuilder append(final char[] chars, final int startIndex, final int length) 
+    {
+        if (length > 0) 
+        {
             final int len = length();
             ensureCapacity(len + length);
             System.arraycopy(chars, startIndex, buffer, len, length);
             size += length;
-        }
-        return this;
-    }
-
-    /**
-     * Appends a boolean value to the string builder.
-     *
-     * @param value
-     *            the value to append
-     * @return this, to enable chaining
-     */
-    public OpenStringBuilder append(final boolean value) {
-        if (value) {
-            ensureCapacity(size + TRUE_STRING_SIZE);
-            buffer[size++] = 't';
-            buffer[size++] = 'r';
-            buffer[size++] = 'u';
-            buffer[size++] = 'e';
-        } else {
-            ensureCapacity(size + FALSE_STRING_SIZE);
-            buffer[size++] = 'f';
-            buffer[size++] = 'a';
-            buffer[size++] = 'l';
-            buffer[size++] = 's';
-            buffer[size++] = 'e';
         }
         return this;
     }
@@ -854,6 +822,7 @@ public class OpenStringBuilder implements CharSequence, Appendable, Serializable
         final int len = length();
         ensureCapacity(len + 1);
         buffer[size++] = ch;
+        
         return this;
     }
 

@@ -15,7 +15,6 @@
  */
 package com.xceptance.common.util;
 
-import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,15 +34,15 @@ import com.xceptance.common.lang.OpenStringBuilder;
 public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
 {
     /**
-     * An empty static XltCharBuffer
+     * Empty array
      */
-    public static final XltCharBuffer EMPTY = new XltCharBuffer(new char[0]);
+    private static final char[] EMPTY_ARRAY = new char[0];
     
     /**
-     * Just a new line
+     * An empty static XltCharBuffer
      */
-    public static final XltCharBuffer NEWLINE = XltCharBuffer.valueOf("\n");
-
+    public static final XltCharBuffer EMPTY = new XltCharBuffer(EMPTY_ARRAY);
+    
     /**
      * The internal buffer, it is shared!
      */
@@ -74,7 +73,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      */
     public XltCharBuffer(final char[] src)
     {
-        this.src = src == null ? new char[0] : src;
+        this.src = src == null ? EMPTY_ARRAY : src;
         this.from = 0;
         this.length = this.src.length;
     }
@@ -100,16 +99,25 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      */
     public XltCharBuffer(final char[] src, final int from, final int length)
     {
-        this.src = src == null ? new char[0] : src;
-        this.from = from;
-        this.length = length;
+        if (src != null)
+        {
+            this.src = src;
+            this.from = from;
+            this.length = length;
+        }
+        else
+        {
+            this.src = EMPTY_ARRAY;
+            this.from = 0;
+            this.length = 0;
+        }
     }
 
     /**
      * Return the character at a position. This code does not run any 
      * checks in regards to pos being correct (>= 0, < length). This will
      * automatically apply the view on the underlying array hence incorrect
-     * pos values might return something unexpectedly.
+     * pos values might return something unexpected. So know what you do or else...
      * 
      * @param pos the position to return
      * @return the character at this position.
@@ -201,7 +209,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      */
     public char peakAhead(final int pos)
     {
-        return from + pos < length ? charAt(pos) : 0;
+        return pos < length ? charAt(pos) : 0;
     }
 
     /**    
@@ -214,8 +222,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      */
     public XltCharBuffer viewByLength(final int from, final int length)
     {
-        var f = this.from + from;
-        return new XltCharBuffer(this.src, f, length);
+        return new XltCharBuffer(this.src, this.from + from, length);
     }
 
     /**    
@@ -264,38 +271,8 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         return EMPTY;
     }
 
-    public static XltCharBuffer valueOf(final String s)
-    {
-        return new XltCharBuffer(s.toCharArray());
-    }
-
-    public static XltCharBuffer valueOf(final OpenStringBuilder s)
-    {
-        return new XltCharBuffer(s.getCharArray(), 0, s.length());
-    }
-
     /**
-     * Append a string to a stringbuilder without an array copy operation
-     * 
-     * @param target the target
-     * @param src the source
-     * @return the passed target for fluid syntax
-     */
-    private static OpenStringBuilder append(final OpenStringBuilder target, final String src)
-    {
-        final int length = src.length();
-        for (int i = 0; i < length; i++)
-        {
-            // because of JDK 11 compact strings, that is not perfect but we want to 
-            // avoid memory waste here and not cpu cycles... always a trade-off
-            target.append(src.charAt(i));
-        }
-
-        return target;
-    }
-
-    /**
-     * Append a charbuffer to a stringbuilder without an array copy operation
+     * Append a charbuffer to a stringbuilder
      * 
      * @param target the target
      * @param src the source
@@ -317,15 +294,9 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      */
     public static XltCharBuffer valueOf(final String s1, final String s2)
     {
-        // our problem is that a String.toCharArray already creates a copy and we
-        // than copy the copy into a new array, hence wasting one full array of 
-        // s1 and s2
-
-        // let's instead see if we can run with openstringbuilder nicely
-        // more cpu in favour of less memory
         final OpenStringBuilder sb = new OpenStringBuilder(s1.length() + s2.length());
-        append(sb, s1);
-        append(sb, s2);
+        sb.append(s1);
+        sb.append(s2);
 
         return new XltCharBuffer(sb.getCharArray(), 0, sb.length());
     }
@@ -339,12 +310,6 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      */
     public static XltCharBuffer valueOf(final XltCharBuffer s1, final XltCharBuffer s2)
     {
-        // our problem is that a String.toCharArray already creates a copy and we
-        // than copy the copy into a new array, hence wasting one full array of 
-        // s1 and s2
-
-        // let's instead see if we can run with openstringbuilder nicely
-        // more cpu in favour of less memory
         final OpenStringBuilder sb = new OpenStringBuilder(s1.length() + s2.length());
         append(sb, s1);
         append(sb, s2);
@@ -389,9 +354,9 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         // let's instead see if we can run with openstringbuilder nicely
         // more cpu in favour of less memory
         final OpenStringBuilder sb = new OpenStringBuilder(s1.length() + s2.length() + s3.length());
-        append(sb, s1);
-        append(sb, s2);
-        append(sb, s3);
+        sb.append(s1);
+        sb.append(s2);
+        sb.append(s3);
 
         return new XltCharBuffer(sb.getCharArray(), 0, sb.length());
     }
@@ -442,13 +407,13 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         }
 
         final OpenStringBuilder sb = new OpenStringBuilder(newSize);
-        append(sb, s1);
-        append(sb, s2);
-        append(sb, s3);
+        sb.append(s1);
+        sb.append(s2);
+        sb.append(s3);
 
         for (int i = 0; i < more.length; i++)
         {
-            append(sb, more[i]);
+            sb.append(more[i]);
         }
 
         return new XltCharBuffer(sb.getCharArray(), 0, sb.length());
@@ -459,6 +424,16 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         return new XltCharBuffer(s);
     }
 
+    public static XltCharBuffer valueOf(final String s)
+    {
+        return new XltCharBuffer(s.toCharArray());
+    }
+
+    public static XltCharBuffer valueOf(final OpenStringBuilder s)
+    {
+        return new XltCharBuffer(s.getCharArray(), 0, s.length());
+    }
+    
     @Override
     public String toString()
     {
@@ -496,6 +471,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     private static int indexOf(char[] source, int sourceOffset, int sourceCount,
                                char[] target, int targetOffset, int targetCount,
                                int fromIndex) {
+        
         if (fromIndex >= sourceCount) {
             return (targetCount == 0 ? sourceCount : -1);
         }
@@ -519,8 +495,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
             if (i <= max) {
                 int j = i + 1;
                 int end = j + targetCount - 1;
-                for (int k = targetOffset + 1; j < end && source[j]
-                    == target[k]; j++, k++);
+                for (int k = targetOffset + 1; j < end && source[j] == target[k]; j++, k++);
 
                 if (j == end) {
                     /* Found whole string. */
@@ -622,7 +597,8 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         int i1 = from + 1;
         int i2 = from + 2;
         int i3 = from + 3;
-        while (i3 < last) {
+        while (i3 < last) 
+        {
             h = h * (31 * 31 * 31 * 31) + src[i0] * (31 * 31 * 31) + src[i1] * (31 * 31) + src[i2] * 31 + src[i3];
             
             i0 = i3 + 1;
@@ -630,13 +606,17 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
             i2 = i3 + 3;
             i3 = i3 + 4;
         }
-        if (i2 < last) {
+        
+        if (i2 < last) 
+        {
             h = h * (31 * 31 * 31) + src[i0] * (31 * 31) + src[i1] * (31) + src[i2];
         }
-        else if (i1 < last) {
+        else if (i1 < last) 
+        {
             h = h * (31 * 31) + src[i0] * (31) + src[i1];
         }
-        else if (i0 < last) {
+        else if (i0 < last) 
+        {
             h = h * 31 + src[i0];
         }
         
@@ -656,6 +636,8 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         {
             return hashCode;
         }
+
+        //return hashCode = hashCodeVectored();
         
         // use the vectored approach for longer strings
         // disabled for now, does not seem to fly well when the entire program runs, while as JMH it is faster
@@ -668,8 +650,9 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         final int last = length + from;
 
         int h = 0;
-        for (int i = from; i < last; i++) {
-            h = ((h << 5) - h) + src[i];
+        for (int i = from; i < last; i++) 
+        {
+            h = (31 * h) + src[i];
         }
         
         return hashCode = h; 

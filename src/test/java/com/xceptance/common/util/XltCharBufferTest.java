@@ -1,93 +1,404 @@
 package com.xceptance.common.util;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
+import java.util.StringJoiner;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.xceptance.common.lang.OpenStringBuilder;
+
 public class XltCharBufferTest
 {
     @Test
-    public void create()
+    public void empty_const()
     {
-        final char[] src = "Test".toCharArray();
-        final XltCharBuffer b = new XltCharBuffer(src);
-        Assert.assertEquals(4, b.length());
-        Assert.assertEquals(String.valueOf(src), b.toString());
+        assertEquals(0, XltCharBuffer.EMPTY.length());
+        assertArrayEquals(new char[0], XltCharBuffer.EMPTY.toCharArray());
+        assertSame(XltCharBuffer.EMPTY, XltCharBuffer.EMPTY);
+        assertEquals(0, XltCharBuffer.EMPTY.hashCode());
     }
 
     @Test
-    public void string()
+    public void empty()
+    {
+        assertEquals(0, XltCharBuffer.empty().length());
+        assertArrayEquals(new char[0], XltCharBuffer.empty().toCharArray());
+        assertEquals(XltCharBuffer.empty(), XltCharBuffer.empty());
+        assertSame(XltCharBuffer.empty(), XltCharBuffer.empty());
+        assertEquals(0, XltCharBuffer.empty().hashCode());
+    }
+
+    @Test
+    public void ctr_chararray()
     {
         {
-            final char[] src = "Test".toCharArray();
-            final XltCharBuffer b = new XltCharBuffer(src);
-            Assert.assertEquals(String.valueOf(src), b.toString());
+            var c = new char[] {};
+            var x = new XltCharBuffer((char[]) null);
+            assertEquals(c.length, x.length());
+            assertArrayEquals(c, x.toCharArray());
         }
-
         {
-            final char[] src = "TestFoobarRally".toCharArray();
-            final XltCharBuffer b = new XltCharBuffer(src);
-            Assert.assertEquals(String.valueOf(src), b.toString());
-
-            Assert.assertEquals("Test", b.viewByLength(0, 4).toString());
-            Assert.assertEquals("Foobar", b.viewByLength(4, 6).toString());
-            Assert.assertEquals("Rally", b.viewByLength(10, 5).toString());
+            var c = new char[] {};
+            var x = new XltCharBuffer(c);
+            assertEquals(c.length, x.length());
+            assertArrayEquals(c, x.toCharArray());
         }
+        {
+            var c = "a".toCharArray();
+            var x = new XltCharBuffer(c);
+            assertEquals(c.length, x.length());
+            assertArrayEquals(c, x.toCharArray());
+        }
+        {
+            var c = "jhjashdj sjdh".toCharArray();
+            var x = new XltCharBuffer(c);
+            assertEquals(c.length, x.length());
+            assertArrayEquals(c, x.toCharArray());
+        }
+        {
+            // ensure that we don't have a copy of the array for speed
+            var c = "012345".toCharArray();
+            var x = new XltCharBuffer(c);
+            c[0] = '9';
+            assertArrayEquals("912345".toCharArray(), x.toCharArray());
+        }        
+
+        // no futher edge cases
+    }
+
+    @Test
+    public void ctr_openstringbuilder()
+    {
+        {
+            var s = "";
+            var os = new OpenStringBuilder(10).append(s);
+            var x = new XltCharBuffer(os);
+            assertEquals(s.length(), x.length());
+            assertArrayEquals(s.toCharArray(), x.toCharArray());
+        }
+        {
+            var s = "012345";
+            var os = new OpenStringBuilder(10).ensureCapacity(100).append(s);
+            var x = new XltCharBuffer(os);
+            assertEquals(s.length(), x.length());
+            assertArrayEquals(s.toCharArray(), x.toCharArray());
+        }
+        {
+            var s = "012345";
+            var os = new OpenStringBuilder(6).append(s);
+            var x = new XltCharBuffer(os);
+            assertEquals(s.length(), x.length());
+            assertArrayEquals(s.toCharArray(), x.toCharArray());
+        }
+    }
+
+    @Test
+    public void ctr_chararray_from_length()
+    {
+        {
+            // null, we will correct the passed numbers, only
+            // edge case handling we have
+            var x = new XltCharBuffer(null, 1, 8);
+            assertEquals(0, x.length());
+            assertArrayEquals("".toCharArray(), x.toCharArray());
+        }
+        {
+            var s = "".toCharArray();
+            var x = new XltCharBuffer(s, 0, 0);
+            assertEquals(s.length, x.length());
+            assertArrayEquals(s, x.toCharArray());
+        }
+        {
+            var s = "0123456789".toCharArray();
+            var x = new XltCharBuffer(s, 0, 10);
+            assertEquals(s.length, x.length());
+            assertArrayEquals(s, x.toCharArray());
+        }
+        {
+            var s = "0123456789".toCharArray();
+            var x = new XltCharBuffer(s, 0, 9);
+            assertEquals("012345678".length(), x.length());
+            assertArrayEquals("012345678".toCharArray(), x.toCharArray());
+        }
+        {
+            var s = "0123456789".toCharArray();
+            var x = new XltCharBuffer(s, 1, 8);
+            assertEquals("12345678".length(), x.length());
+            assertArrayEquals("12345678".toCharArray(), x.toCharArray());
+        }
+        {
+            var s = "0123456789".toCharArray();
+            var x = new XltCharBuffer(s, 1, 0);
+            assertEquals(0, x.length());
+            assertArrayEquals("".toCharArray(), x.toCharArray());
+        }
+    }
+
+    @Test
+    public void valueof_openstringbuilder()
+    {
+        {
+            var s = "";
+            var os = new OpenStringBuilder(10).append(s);
+            var x = XltCharBuffer.valueOf(os);
+            assertEquals(s.length(), x.length());
+            assertArrayEquals(s.toCharArray(), x.toCharArray());
+        }
+        {
+            var s = "012345";
+            var os = new OpenStringBuilder(10).ensureCapacity(100).append(s);
+            var x = XltCharBuffer.valueOf(os);
+            assertEquals(s.length(), x.length());
+            assertArrayEquals(s.toCharArray(), x.toCharArray());
+        }
+        {
+            var s = "012345";
+            var os = new OpenStringBuilder(6).append(s);
+            var x = XltCharBuffer.valueOf(os);
+            assertEquals(s.length(), x.length());
+            assertArrayEquals(s.toCharArray(), x.toCharArray());
+        }   
+    }
+
+    @Test
+    public void valueof_chararray()
+    {
+        {
+            var c = new char[] {};
+            var x = XltCharBuffer.valueOf((char[]) null);
+            assertEquals(c.length, x.length());
+            assertArrayEquals(c, x.toCharArray());
+        }
+        {
+            var c = new char[] {};
+            var x = XltCharBuffer.valueOf(c);
+            assertEquals(c.length, x.length());
+            assertArrayEquals(c, x.toCharArray());
+        }
+        {
+            var c = "a".toCharArray();
+            var x = XltCharBuffer.valueOf(c);
+            assertEquals(c.length, x.length());
+            assertArrayEquals(c, x.toCharArray());
+        }
+        {
+            var c = "jhjashdj sjdh".toCharArray();
+            var x = XltCharBuffer.valueOf(c);
+            assertEquals(c.length, x.length());
+            assertArrayEquals(c, x.toCharArray());
+        }
+        {
+            // ensure that we don't have a copy of the array for speed
+            var c = "012345".toCharArray();
+            var x = XltCharBuffer.valueOf(c);
+            c[0] = '9';
+            assertArrayEquals("912345".toCharArray(), x.toCharArray());
+        }
+
+    }
+
+    @Test
+    public void valueof_string()
+    {
+        var f = new Consumer<String>() 
+        {
+            @Override
+            public void accept(String s)
+            {
+                var x = XltCharBuffer.valueOf(s);
+                assertEquals(s.length(), x.length());
+                assertArrayEquals(s.toCharArray(), x.toCharArray());
+            }
+
+        };
+
+        f.accept("");
+        f.accept("9q389328932");
+    }
+
+    @Test
+    public void valueof_string_string()
+    {
+        var f = new BiConsumer<String, String>() 
+        {
+            @Override
+            public void accept(String s1, String s2)
+            {
+                var x = XltCharBuffer.valueOf(s1, s2);
+                var e = s1 + s2;
+                assertEquals(e.length(), x.length());
+                assertTrue(x.equals(XltCharBuffer.valueOf(e)));
+                assertArrayEquals(e.toCharArray(), x.toCharArray());
+            }
+        };
+
+        f.accept("", "");
+        f.accept("", "s");
+        f.accept("s", "");
+        f.accept("12345", "1234asdfasfd");
+    }
+
+    @Test
+    public void valueof_string_string_string()
+    {
+        var f = new Object() 
+        {
+            public void accept(String s1, String s2, String s3)
+            {
+                var x = XltCharBuffer.valueOf(s1, s2, s3);
+                var e = s1 + s2 + s3;
+                assertEquals(e.length(), x.length());
+                assertTrue(x.equals(XltCharBuffer.valueOf(e)));
+                assertArrayEquals(e.toCharArray(), x.toCharArray());
+            }
+        };
+
+        f.accept("", "", "");
+        f.accept("", "s", "s");
+        f.accept("s", "", "");
+        f.accept("12345", "1234asdfasfd", "098765");
+    }
+
+    @Test
+    public void valueof_string_vargs()
+    {
+        var f = new Object() 
+        {
+            public void accept(String s1, String s2, String s3, String... vargs)
+            {
+                var x = XltCharBuffer.valueOf(s1, s2, s3, vargs);
+                var e = s1 + s2 + s3;
+                for (String s : vargs)
+                {
+                    e += s;
+                }
+                assertEquals(e.length(), x.length());
+                assertTrue(x.equals(XltCharBuffer.valueOf(e)));
+                assertArrayEquals(e.toCharArray(), x.toCharArray());
+            }
+        };
+
+        f.accept("", "", "", "");
+        f.accept("", "s", "s", "");
+        f.accept("s", "", "", "");
+        f.accept("12345", "1234asdfasfd", "098765", "sds");
+        f.accept("12345", "1234asdfasfd", "098765", "sds", "aa");
+    }
+
+    @Test
+    public void valueof_buffer_char()
+    {
+        var f = new Object() 
+        {
+            public void accept(XltCharBuffer x, char c)
+            {
+                var r = XltCharBuffer.valueOf(x, c);
+                var e = x.toString() + c;
+                assertEquals(e.length(), r.length());
+                assertArrayEquals(e.toCharArray(), r.toCharArray());
+            }
+        };
+
+        f.accept(XltCharBuffer.valueOf(""), 'a');
+        f.accept(XltCharBuffer.valueOf("Tes"), 't');
+        f.accept(XltCharBuffer.valueOf("0123456").viewByLength(2, 2), 't');
+    }
+
+    @Test
+    public void valueof_buffer_buffer()
+    {
+        var f = new Object() 
+        {
+            public void accept(XltCharBuffer x1, XltCharBuffer x2)
+            {
+                var r = XltCharBuffer.valueOf(x1, x2);
+                var e = x1.toString() + x2.toString();
+                assertEquals(e.length(), r.length());
+                assertArrayEquals(e.toCharArray(), r.toCharArray());
+            }
+        };
+
+        f.accept(XltCharBuffer.valueOf(""), XltCharBuffer.valueOf(""));
+        f.accept(XltCharBuffer.valueOf("Tes"), XltCharBuffer.valueOf("t"));
+        f.accept(
+                 XltCharBuffer.valueOf("0123456").viewByLength(2, 2),
+                 XltCharBuffer.valueOf("0123456").viewByLength(2, 2));
+    }
+
+    @Test
+    public void valueof_buffer_buffer_buffer()
+    {
+        var f = new Object() 
+        {
+            public void accept(XltCharBuffer x1, XltCharBuffer x2, XltCharBuffer x3)
+            {
+                var r = XltCharBuffer.valueOf(x1, x2, x3);
+                var e = x1.toString() + x2.toString() + x3.toString();
+                assertEquals(e.length(), r.length());
+                assertArrayEquals(e.toCharArray(), r.toCharArray());
+            }
+        };
+
+        f.accept(XltCharBuffer.valueOf(""), XltCharBuffer.valueOf(""), XltCharBuffer.valueOf(""));
+        f.accept(XltCharBuffer.valueOf("Tes"), XltCharBuffer.valueOf("t"), XltCharBuffer.valueOf("0987"));
+        f.accept(
+                 XltCharBuffer.valueOf("0123456").viewByLength(2, 2),
+                 XltCharBuffer.valueOf("0123456").viewByLength(2, 2),
+                 XltCharBuffer.valueOf("821821").viewByLength(2, 4));
     }
 
     @Test
     public void put()
     {
-        final char[] src = "Test".toCharArray();
-        final XltCharBuffer b = new XltCharBuffer(src);
+        {
+            var b = XltCharBuffer.valueOf("Test");
 
-        b.put(1, 'ä'); Assert.assertEquals("Täst", b.toString());
-        b.put(0, '1'); Assert.assertEquals("1äst", b.toString());
-        b.put(3, '3'); Assert.assertEquals("1äs3", b.toString());
-        b.put(2, '2'); Assert.assertEquals("1ä23", b.toString());
+            b.put(1, 'ä'); Assert.assertEquals("Täst", b.toString());
+            b.put(0, '1'); Assert.assertEquals("1äst", b.toString());
+            b.put(3, '3'); Assert.assertEquals("1äs3", b.toString());
+            b.put(2, '2'); Assert.assertEquals("1ä23", b.toString());
+        }
+        {
+            var b = XltCharBuffer.valueOf("0123456789").viewFromTo(3, 7);
+
+            b.put(1, 'a'); Assert.assertEquals("3a56", b.toString());
+            b.put(0, 'b'); Assert.assertEquals("ba56", b.toString());
+            b.put(3, 'c'); Assert.assertEquals("ba5c", b.toString());
+            b.put(2, 'd'); Assert.assertEquals("badc", b.toString());
+        }
     }
 
     @Test
-    public void putWithView()
+    public void charAt()
     {
-        final char[] src = "TestFoo".toCharArray();
-        final XltCharBuffer b = new XltCharBuffer(src);
-        final XltCharBuffer b1 = b.viewByLength(0, 4);
-        final XltCharBuffer b2 = b.viewByLength(4, 3);
+        var b = XltCharBuffer.valueOf("0123456789");
+        var b1 = b.viewByLength(0, 4); // 0123
+        var b2 = b.viewByLength(3, 3); // 345
+        var b3 = b2.viewByLength(1, 2); // 45
 
-        b1.put(1, 'ä');
-        Assert.assertEquals("Täst", b1.toString());
-        Assert.assertEquals("Foo", b2.toString());
+        Assert.assertEquals('0', b.charAt(0));
+        Assert.assertEquals('5', b.charAt(5));
+        Assert.assertEquals('6', b.charAt(6));
 
-        b2.put(1, '1');
-        Assert.assertEquals("Täst", b1.toString());
-        Assert.assertEquals("F1o", b2.toString());
+        Assert.assertEquals('0', b1.charAt(0));
+        Assert.assertEquals('1', b1.charAt(1));
+        Assert.assertEquals('2', b1.charAt(2));
+        Assert.assertEquals('3', b1.charAt(3));
 
-        Assert.assertEquals("TästF1o", b.toString());
-    }
+        Assert.assertEquals('3', b2.charAt(0));
+        Assert.assertEquals('4', b2.charAt(1));
+        Assert.assertEquals('5', b2.charAt(2));
 
-    @Test
-    public void get()
-    {
-        final char[] src = "TestFo2".toCharArray();
-        final XltCharBuffer b = new XltCharBuffer(src);
-        final XltCharBuffer b1 = b.viewByLength(0, 4);
-        final XltCharBuffer b2 = b.viewByLength(4, 3);
-
-        Assert.assertEquals('T', b.get(0));
-        Assert.assertEquals('o', b.get(5));
-        Assert.assertEquals('2', b.get(6));
-
-        Assert.assertEquals('T', b1.get(0));
-        Assert.assertEquals('e', b1.get(1));
-        Assert.assertEquals('s', b1.get(2));
-        Assert.assertEquals('t', b1.get(3));
-
-        Assert.assertEquals('F', b2.get(0));
-        Assert.assertEquals('o', b2.get(1));
-        Assert.assertEquals('2', b2.get(2));
+        Assert.assertEquals('4', b3.charAt(0));
+        Assert.assertEquals('5', b3.charAt(1));
     }
 
     @Test
@@ -115,7 +426,7 @@ public class XltCharBufferTest
         var x = XltCharBuffer.valueOf("0123456");
 
         assertEquals(XltCharBuffer.valueOf(""), x.viewByLength(0, 1).viewByLength(0, 0));
-        
+
         assertEquals(XltCharBuffer.valueOf("0"), x.viewByLength(0, 2).viewByLength(0, 1));
         assertEquals(XltCharBuffer.valueOf("1"), x.viewByLength(0, 2)/*01*/.viewByLength(1, 1));
 
@@ -130,55 +441,70 @@ public class XltCharBufferTest
         assertEquals(XltCharBuffer.valueOf("123"), x.viewByLength(1, 3)/*123*/.viewByLength(0, 3));
 
         assertEquals(XltCharBuffer.valueOf("45"), x.viewByLength(4, 3)/*456*/.viewByLength(0, 2));
-        
+
         assertEquals(XltCharBuffer.valueOf("b"), XltCharBuffer.valueOf("abc").viewByLength(1, 1).viewByLength(0, 1));
     }
 
-    
+
     @Test
     public void viewFromTo()
     {
-        final char[] src = "TestFo2".toCharArray();
-        final XltCharBuffer b = new XltCharBuffer(src);
+        var b = XltCharBuffer.valueOf("TestFo2");
 
-        // Assert.assertEquals("", b.viewFromTo(0, 0).toString());
+        Assert.assertEquals("", b.viewFromTo(0, 0).toString());
         Assert.assertEquals("T", b.viewFromTo(0, 1).toString());
         Assert.assertEquals("TestFo2", b.viewFromTo(0, 7).toString());
         Assert.assertEquals("2", b.viewFromTo(6, 7).toString());
-        // Assert.assertEquals("", b.viewFromTo(6, 6).toString());
+        Assert.assertEquals("", b.viewFromTo(6, 6).toString());
 
         Assert.assertEquals("est", b.viewFromTo(1, 4).toString());
         Assert.assertEquals("Fo2", b.viewFromTo(4, 7).toString());
+    }
+    
+    @Test
+    public void viewFromTo_viewFromTo()
+    {
+        var b = XltCharBuffer.valueOf("TA0123456789A").viewFromTo(2, 12);
 
+        Assert.assertEquals("0123456789", b.toString());
+        Assert.assertEquals("", b.viewFromTo(0, 0).toString());
+        Assert.assertEquals("0", b.viewFromTo(0, 1).toString());
+        Assert.assertEquals("0123456", b.viewFromTo(0, 7).toString());
+        Assert.assertEquals("6", b.viewFromTo(6, 7).toString());
+        Assert.assertEquals("", b.viewFromTo(6, 6).toString());
+
+        Assert.assertEquals("123", b.viewFromTo(1, 4).toString());
+        Assert.assertEquals("456", b.viewFromTo(4, 7).toString());
     }
 
     @Test
     public void peakAhead()
     {
-        final char[] src = "TestFo2".toCharArray();
-        final XltCharBuffer b = new XltCharBuffer(src);
+        {
+            var b = XltCharBuffer.valueOf("012345");
 
-        Assert.assertEquals('T', b.peakAhead(0));
-        Assert.assertEquals('e', b.peakAhead(1));
-        Assert.assertEquals('s', b.peakAhead(2));
-        Assert.assertEquals('t', b.peakAhead(3));
-        Assert.assertEquals('F', b.peakAhead(4));
-        Assert.assertEquals('o', b.peakAhead(5));
-        Assert.assertEquals('2', b.peakAhead(6));
-        Assert.assertEquals(0, b.peakAhead(7));
-        Assert.assertEquals(0, b.peakAhead(8));
+            Assert.assertEquals('0', b.peakAhead(0));
+            Assert.assertEquals('1', b.peakAhead(1));
+            Assert.assertEquals('2', b.peakAhead(2));
+            Assert.assertEquals('3', b.peakAhead(3));
+            Assert.assertEquals('4', b.peakAhead(4));
+            Assert.assertEquals('5', b.peakAhead(5));
+            Assert.assertEquals(0, b.peakAhead(6));
+            Assert.assertEquals(0, b.peakAhead(7));
+        }
+        {
+            var b = XltCharBuffer.valueOf("TA01234X").viewFromTo(2, 7);
+
+            Assert.assertEquals('0', b.peakAhead(0));
+            Assert.assertEquals('1', b.peakAhead(1));
+            Assert.assertEquals('2', b.peakAhead(2));
+            Assert.assertEquals('3', b.peakAhead(3));
+            Assert.assertEquals('4', b.peakAhead(4));
+            Assert.assertEquals(0, b.peakAhead(5));
+            Assert.assertEquals(0, b.peakAhead(6));
+        }
     }
 
-    //    @Test
-    //    public void viewOfViews()
-    //    {
-    //        final char[] src = "TestFo2".toCharArray();
-    //        final XltCharBuffer b = new XltCharBuffer(src);
-    //        
-    //        Assert.assertEquals("", b.viewFromTo(0, 0).toString());
-    //
-    //    }
-    //    
     @Test
     public void length()
     {
@@ -190,19 +516,6 @@ public class XltCharBufferTest
         Assert.assertEquals(1, new XltCharBuffer("TA".toCharArray()).viewByLength(0, 1).length());
         Assert.assertEquals(1, new XltCharBuffer("TA".toCharArray()).viewByLength(1, 1).length());
         Assert.assertEquals(2, new XltCharBuffer("TA".toCharArray()).viewByLength(0, 2).length());
-    }
-
-    @Test
-    public void empty()
-    {
-        final char[] src = "TestFo2".toCharArray();
-        final XltCharBuffer b = new XltCharBuffer(src);
-
-        Assert.assertEquals(0, b.viewByLength(0, 0).length());
-        Assert.assertEquals("", b.viewByLength(0, 0).toString());
-
-        Assert.assertEquals(0, XltCharBuffer.empty().length());
-        Assert.assertEquals("", XltCharBuffer.empty().toString());
     }
 
     @Test

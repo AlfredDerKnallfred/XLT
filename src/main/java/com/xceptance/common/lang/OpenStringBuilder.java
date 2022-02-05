@@ -24,16 +24,15 @@ import java.nio.CharBuffer;
 import java.util.Iterator;
 import java.util.Objects;
 
-import org.apache.commons.text.Builder;
 import org.apache.commons.text.matcher.StringMatcher;
 
 /**
  * This is a StringBuilder with open access to the char array to avoid copy operations. This is 
- * based on TextStringBuilder from Apache Commons.
+ * based on TextStringBuilder from Apache Commons with some modifcations.
  *
- * @since 1.3
+ * @since 7.0
  */
-public class OpenStringBuilder implements CharSequence, Appendable, Serializable, Builder<String> {
+public class OpenStringBuilder implements CharSequence, Appendable, Serializable {
 
     /**
      * The size of the string {@code "false"}.
@@ -94,7 +93,7 @@ public class OpenStringBuilder implements CharSequence, Appendable, Serializable
      *            the string to copy, null treated as blank string
      */
     public OpenStringBuilder(final String str) {
-        super();
+        super(); 
         if (str == null) {
             buffer = new char[CAPACITY];
         } else {
@@ -2552,17 +2551,6 @@ public class OpenStringBuilder implements CharSequence, Appendable, Serializable
      */
     public StringBuilder toStringBuilder() {
         return new StringBuilder(size).append(buffer, 0, size);
-    }
-
-    /**
-     * Implement the {@link Builder} interface.
-     *
-     * @return The builder as a String
-     * @see #toString()
-     */
-    @Override
-    public String build() {
-        return toString();
     }
 
     // -----------------------------------------------------------------------

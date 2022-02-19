@@ -114,6 +114,17 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     }
 
     /**
+     * Just returns an empty buffer. This is a static object and not
+     * a new buffer every time, so apply caution.
+     * 
+     * @return the empty buffer
+     */
+    public static XltCharBuffer empty()
+    {
+        return EMPTY;
+    }
+    
+    /**
      * Return the character at a position. This code does not run any 
      * checks in regards to pos being correct (>= 0, < length). This will
      * automatically apply the view on the underlying array hence incorrect
@@ -261,18 +272,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     }
     
     /**
-     * Just returns an empty buffer. This is a static object and not
-     * a new buffer every time, so apply caution.
-     * 
-     * @return the empty buffer
-     */
-    public static XltCharBuffer empty()
-    {
-        return EMPTY;
-    }
-
-    /**
-     * Append a charbuffer to a stringbuilder
+     * Append a charbuffer to a stringbuilder. Internal helper.
      * 
      * @param target the target
      * @param src the source
@@ -284,7 +284,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
 
         return target;
     }
-
+    
     /**
      * Creates a new char buffer by merging strings
      * 
@@ -388,8 +388,11 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     /**
      * Creates a new char buffer by merging strings
      * 
-     * @param s
-     * @return
+     * @param s1 string 1
+     * @param s2 string 2
+     * @param s3 string 3
+     * @param more more strings
+     * @return a new char buffer
      */
     public static XltCharBuffer valueOf(final String s1, final String s2, final String s3, final String... more)
     {
@@ -419,21 +422,48 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         return new XltCharBuffer(sb.getCharArray(), 0, sb.length());
     }
 
+    /**
+     * Create a new char buffer from a char array without copying it. It assume that the 
+     * full array is valid and because we don't copy, we don't have immutability!
+     * 
+     * @param s the char array to use
+     * @return a new charbuffer instance
+     */
     public static XltCharBuffer valueOf(final char[] s)
     {
         return new XltCharBuffer(s);
     }
 
+    /**
+     * Create a new char buffer from a string. Because a string does provide array access, 
+     * we use the returned copy by toCharArray to set up the char buffer.
+     * 
+     * @param s the string to use
+     * @return a new charbuffer instance
+     */
     public static XltCharBuffer valueOf(final String s)
     {
         return new XltCharBuffer(s.toCharArray());
     }
 
+    /**
+     * A new charbuffer from an open string builder. We don't copy the underlying array,
+     * hence string builder and char buffer refer to the same underlying data!
+     * 
+     * @param s the builder to get the array from 
+     * @return a new charbuffer instance
+     */
     public static XltCharBuffer valueOf(final OpenStringBuilder s)
     {
         return new XltCharBuffer(s.getCharArray(), 0, s.length());
     }
     
+    /**
+     * Just return the content of this buffer as string. This is of course
+     * a copy operation.
+     * 
+     * @return a string representation of this buffer
+     */
     @Override
     public String toString()
     {
@@ -451,7 +481,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         final char[] target = new char[length];
 
         System.arraycopy(src, from, target, 0, length);
-
+ 
         return target;
     }
 
@@ -467,6 +497,8 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      * @param   targetOffset offset of the target string.
      * @param   targetCount  count of the target string.
      * @param   fromIndex    the index to begin searching from.
+     * 
+     * @return the first position both array match
      */
     private static int indexOf(char[] source, int sourceOffset, int sourceCount,
                                char[] target, int targetOffset, int targetCount,
@@ -506,6 +538,12 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         return -1;
     }
 
+    /**
+     * Find the first occurrence of a char
+     * 
+     * @param c the char to search
+     * @return the position or -1 otherwise
+     */
     public int indexOf(final char c) 
     {
         final int end = length + this.from;
@@ -514,40 +552,6 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
             if (this.src[i] == c)
             {
                 return i - this.from;
-            }
-        }
-
-        return -1;
-    }
-
-    public boolean endsWith(final XltCharBuffer s) 
-    {
-        if (s.length > this.length)
-        {
-            return false;
-        }
-
-        return indexOf(s, this.length - s.length) > -1;
-    }
-
-    public boolean startsWith(final XltCharBuffer s) 
-    {
-        return indexOf(s, 0) == 0;
-    }
-
-    public int lastIndexOf(final XltCharBuffer s) 
-    {
-        return lastIndexOf(s, this.length);
-    }
-
-    public int lastIndexOf(final XltCharBuffer s, int from) 
-    {
-        for (int i = from; i >= 0; i--)
-        {
-            int last = indexOf(s, i);
-            if (last > -1)
-            {
-                return last <= from ? last : -1;
             }
         }
 
@@ -575,7 +579,69 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     {
         return indexOf(this.src, from, length, s.src, s.from, s.length, fromIndex);
     }
+    
+    /**
+     * Checks whether or not a buffer ends with the content of another buffer
+     * 
+     * @param s the buffer that has to be machting the end of this buffer
+     * @return true if the end matches, false otherwise
+     */
+    public boolean endsWith(final XltCharBuffer s) 
+    {
+        if (s.length > this.length)
+        {
+            return false;
+        }
 
+        return indexOf(s, this.length - s.length) > -1;
+    }
+
+    /**
+     * Checks if the start of the buffer matches another buffer
+     * @param s the buffer to match the start against
+     * @return true if the start matches, false otherwise
+     */
+    public boolean startsWith(final XltCharBuffer s) 
+    {
+        return indexOf(s, 0) == 0;
+    }
+
+    /**
+     * Returns the last occurrence of a buffer in this buffer
+     * 
+     * @param s the buffer to looks for
+     * @return the position of the last occurrence or -1
+     */
+    public int lastIndexOf(final XltCharBuffer s) 
+    {
+        return lastIndexOf(s, this.length);
+    }
+
+    /**
+     * Returns the last occurrence of a buffer in this starting from a certain offset
+     * and searching backwards(!) from there
+     * 
+     * @param s the buffer to looks for
+     * @param from the offset to start from
+     * @return the position of the last occurrence or -1
+     */
+    public int lastIndexOf(final XltCharBuffer s, int from) 
+    {
+        for (int i = from; i >= 0; i--)
+        {
+            int last = indexOf(s, i);
+            if (last > -1)
+            {
+                return last <= from ? last : -1;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Returns the length of this buffer
+     */
     public int length()
     {
         return length;

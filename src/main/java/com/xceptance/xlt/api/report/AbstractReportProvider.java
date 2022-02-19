@@ -78,18 +78,32 @@ public abstract class AbstractReportProvider implements ReportProvider
         int sampleFactor = dataContainer.sampleFactor;
         int droppedLines = dataContainer.droppedLines;
 
-        for (int i = 0; i < size; i++)
+        int p = 1;
+        for (; p < size; p = p + 1)
         {
-            final Data d = data.get(i);
+            final Data d = data.get(p);
             processDataRecord(d);
-            
-            if (droppedLines > 0 && !(d instanceof TransactionData))
+        }
+        
+        if (droppedLines > 0)
+        {
+            for (int i = 0; i < size; i++)
             {
-                for (int y = 1; y < sampleFactor; y++)
+                final Data d = data.get(i);
+            
+                if (!(d instanceof TransactionData))
                 {
-                    processDataRecord(d);
+                    for (int y = 1; y < sampleFactor; y++)
+                    {
+                        processDataRecord(d);
+                    }
+                    droppedLines--;
+                    
+                    if (droppedLines == 0)
+                    {
+                        break;
+                    }
                 }
-                droppedLines--;
             }
         }
     }

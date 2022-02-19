@@ -15,8 +15,7 @@
  */
 package com.xceptance.xlt.report;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -92,45 +91,38 @@ class StatisticsProcessor
      */
     public void process(final PostprocessedDataContainer dataContainer)
     {
-        // it might be empty when filtered
+        // it might be empty after filtered
         if (dataContainer.data.size() == 0)
         {
             return;
         }
         
         // get your own list
-        final Deque<ReportProvider> providerList = new ArrayDeque<>(reportProviders);
+        final List<ReportProvider> providerList = new ArrayList<>(reportProviders);
 
         // run as long as we have not all data put into the report providers
         while (providerList.isEmpty() == false)
         {
             ReportProvider provider = null;
 
-            int attemptsBeforeYielding = providerList.size();
-            do 
+            for (int i = 0; i < providerList.size(); i++)
             {
-                provider = providerList.pollFirst();
-                final boolean wasLocked = provider.lock();
-
-                // if another thread is in that provider, put it back and try again
-                if (wasLocked == false)
+                final boolean wasLocked = providerList.get(i).lock();
+                if (wasLocked)
                 {
-                    providerList.addLast(provider);
-                    provider = null;
-
-                    if (attemptsBeforeYielding == 0)
-                    {
-                        attemptsBeforeYielding = providerList.size();
-                        Thread.yield(); 
-                    }
-                    else
-                    {
-                        attemptsBeforeYielding--;
-                    }
+                    provider = providerList.remove(i);
+                    break;
                 }
             }
-            while (provider == null);
+                
+            if (provider == null)
+            {
+                // got none, give up the cpu
+                Thread.yield();
+                continue;
+            }
 
+            // we have one, we can process the data
             try
             {
                 provider.processAll(dataContainer);
@@ -142,43 +134,14 @@ class StatisticsProcessor
             finally
             {
                 provider.unlock();
-                attemptsBeforeYielding = providerList.size(); 
             }
         }
 
         // get the max and min
         synchronized (this)
         {
-//            System.out.println(String.format("%s, %s - container: %s, %s", minimumTime, maximumTime, dataContainer.getMinimumTime(), dataContainer.getMaximumTime()));
-
             minimumTime = Math.min(minimumTime, dataContainer.getMinimumTime());
             maximumTime = Math.max(maximumTime, dataContainer.getMaximumTime());
         }
     }
-
-    //    /**
-    //     * Maintain our statistics
-    //     *
-    //     * @param data
-    //     *            the data records
-    //     */
-    //    private void maintainStatistics(final List<Data> data)
-    //    {
-    //        long min = minimumTime;
-    //        long max = maximumTime;
-    //
-    //        // process the data
-    //        final int size = data.size();
-    //        for (int i = 0; i < size; i++)
-    //        {
-    //            // maintain statistics
-    //            final long time = data.get(i).getTime();
-    //
-    //            min = Math.min(min, time);
-    //            max = Math.max(max, time);
-    //        }
-    //
-    //        minimumTime = min;
-    //        maximumTime = max;
-    //    }
 }

@@ -5,9 +5,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
-import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
@@ -449,32 +449,118 @@ public class XltCharBufferTest
     @Test
     public void viewFromTo()
     {
-        var b = XltCharBuffer.valueOf("TestFo2");
+        {
+            var b = XltCharBuffer.valueOf("TestFo2");
 
-        Assert.assertEquals("", b.viewFromTo(0, 0).toString());
-        Assert.assertEquals("T", b.viewFromTo(0, 1).toString());
-        Assert.assertEquals("TestFo2", b.viewFromTo(0, 7).toString());
-        Assert.assertEquals("2", b.viewFromTo(6, 7).toString());
-        Assert.assertEquals("", b.viewFromTo(6, 6).toString());
+            Assert.assertEquals("", b.viewFromTo(0, 0).toString());
+            Assert.assertEquals("T", b.viewFromTo(0, 1).toString());
+            Assert.assertEquals("TestFo2", b.viewFromTo(0, 7).toString());
+            Assert.assertEquals("2", b.viewFromTo(6, 7).toString());
+            Assert.assertEquals("", b.viewFromTo(6, 6).toString());
 
-        Assert.assertEquals("est", b.viewFromTo(1, 4).toString());
-        Assert.assertEquals("Fo2", b.viewFromTo(4, 7).toString());
+            Assert.assertEquals("est", b.viewFromTo(1, 4).toString());
+            Assert.assertEquals("Fo2", b.viewFromTo(4, 7).toString());
+        }
+        {
+            var b = XltCharBuffer.valueOf("TA0123456789A").viewFromTo(2, 12);
+
+            Assert.assertEquals("0123456789", b.toString());
+            Assert.assertEquals("", b.viewFromTo(0, 0).toString());
+            Assert.assertEquals("0", b.viewFromTo(0, 1).toString());
+            Assert.assertEquals("0123456", b.viewFromTo(0, 7).toString());
+            Assert.assertEquals("6", b.viewFromTo(6, 7).toString());
+            Assert.assertEquals("", b.viewFromTo(6, 6).toString());
+
+            Assert.assertEquals("123", b.viewFromTo(1, 4).toString());
+            Assert.assertEquals("456", b.viewFromTo(4, 7).toString());
+        }
     }
-    
+
     @Test
-    public void viewFromTo_viewFromTo()
+    public void substring_from_to()
     {
-        var b = XltCharBuffer.valueOf("TA0123456789A").viewFromTo(2, 12);
+        // identical code to viewFromTo, so the same stuff here
+        {
+            var b = XltCharBuffer.valueOf("TestFo2");
 
-        Assert.assertEquals("0123456789", b.toString());
-        Assert.assertEquals("", b.viewFromTo(0, 0).toString());
-        Assert.assertEquals("0", b.viewFromTo(0, 1).toString());
-        Assert.assertEquals("0123456", b.viewFromTo(0, 7).toString());
-        Assert.assertEquals("6", b.viewFromTo(6, 7).toString());
-        Assert.assertEquals("", b.viewFromTo(6, 6).toString());
+            Assert.assertEquals("", b.substring(0, 0).toString());
+            Assert.assertEquals("T", b.substring(0, 1).toString());
+            Assert.assertEquals("TestFo2", b.substring(0, 7).toString());
+            Assert.assertEquals("2", b.substring(6, 7).toString());
+            Assert.assertEquals("", b.substring(6, 6).toString());
 
-        Assert.assertEquals("123", b.viewFromTo(1, 4).toString());
-        Assert.assertEquals("456", b.viewFromTo(4, 7).toString());
+            Assert.assertEquals("est", b.substring(1, 4).toString());
+            Assert.assertEquals("Fo2", b.substring(4, 7).toString());
+        }
+        {
+            var b = XltCharBuffer.valueOf("TA0123456789A").substring(2, 12);
+
+            Assert.assertEquals("0123456789", b.toString());
+            Assert.assertEquals("", b.substring(0, 0).toString());
+            Assert.assertEquals("0", b.substring(0, 1).toString());
+            Assert.assertEquals("0123456", b.substring(0, 7).toString());
+            Assert.assertEquals("6", b.substring(6, 7).toString());
+            Assert.assertEquals("", b.substring(6, 6).toString());
+
+            Assert.assertEquals("123", b.substring(1, 4).toString());
+            Assert.assertEquals("456", b.substring(4, 7).toString());
+        }
+    }
+
+    @Test
+    public void substring_from()
+    {
+        {
+            var b = XltCharBuffer.valueOf("0123456");
+
+            assertEquals("0123456", b.substring(0).toString());
+            assertEquals("123456", b.substring(1).toString());
+            assertEquals("23456", b.substring(2).toString());
+            assertEquals("3456", b.substring(3).toString());
+            assertEquals("456", b.substring(4).toString());
+            assertEquals("56", b.substring(5).toString());
+            assertEquals("6", b.substring(6).toString());
+            assertEquals("", b.substring(7).toString());
+        }
+    }
+
+    @Test
+    public void toCharArray()
+    {
+        assertArrayEquals("".toCharArray(), new XltCharBuffer((char[])null).toCharArray());
+        assertArrayEquals("".toCharArray(), XltCharBuffer.valueOf("").toCharArray());
+        assertArrayEquals("0123456".toCharArray(), XltCharBuffer.valueOf("0123456").toCharArray());
+
+        {
+            var sb = new OpenStringBuilder(10).append("01234");
+            assertArrayEquals("01234".toCharArray(), XltCharBuffer.valueOf(sb).toCharArray());
+        }
+        {
+            var x = XltCharBuffer.valueOf("copyTestStuff").viewByLength(4,  4);
+            assertArrayEquals("Test".toCharArray(), x.toCharArray());
+        }        
+        {
+            // Make sure it is a copy
+            var x = XltCharBuffer.valueOf("copy");
+            assertArrayEquals("0123456".toCharArray(), XltCharBuffer.valueOf("0123456").toCharArray());
+
+            x.put(0, 'A');
+            assertArrayEquals("0123456".toCharArray(), XltCharBuffer.valueOf("0123456").toCharArray());
+        }
+    }
+
+
+    @Test
+    public void test_toString()
+    {
+        assertEquals("", new XltCharBuffer((char[])null).toString());
+        assertEquals("", XltCharBuffer.valueOf("").toString());
+        assertEquals("0123456", XltCharBuffer.valueOf("0123456").toString());
+
+        {
+            var sb = new OpenStringBuilder(10).append("01234");
+            assertEquals("01234", XltCharBuffer.valueOf(sb).toString());
+        }
     }
 
     @Test
@@ -508,28 +594,118 @@ public class XltCharBufferTest
     @Test
     public void length()
     {
-        Assert.assertEquals(0, new XltCharBuffer("".toCharArray()).length());
-        Assert.assertEquals(1, new XltCharBuffer("T".toCharArray()).length());
-        Assert.assertEquals(2, new XltCharBuffer("TA".toCharArray()).length());
+        assertEquals(0, XltCharBuffer.valueOf("").length());
+        assertEquals(1, XltCharBuffer.valueOf("T").length());
+        assertEquals(2, XltCharBuffer.valueOf("Ta").length());
 
-        Assert.assertEquals(0, new XltCharBuffer("TA".toCharArray()).viewByLength(0, 0).length());
-        Assert.assertEquals(1, new XltCharBuffer("TA".toCharArray()).viewByLength(0, 1).length());
-        Assert.assertEquals(1, new XltCharBuffer("TA".toCharArray()).viewByLength(1, 1).length());
-        Assert.assertEquals(2, new XltCharBuffer("TA".toCharArray()).viewByLength(0, 2).length());
+        assertEquals(0, XltCharBuffer.valueOf("01234").viewByLength(0, 0).length());
+        assertEquals(1, XltCharBuffer.valueOf("01234").viewByLength(1, 1).length());
+        assertEquals(5, XltCharBuffer.valueOf("01234").viewByLength(0, 5).length());
+        assertEquals(2, XltCharBuffer.valueOf("01234").viewByLength(2, 2).length());
+
+        assertEquals(3, XltCharBuffer.valueOf("01234").viewByLength(1, 4).viewByLength(1, 3).length());
+        assertEquals(2, XltCharBuffer.valueOf("01234").viewByLength(0, 4).viewByLength(2, 2).length());
     }
 
     @Test
     public void indexOf_char()
     {
-        Assert.assertEquals(-1, XltCharBuffer.valueOf("").indexOf('a'));
-        Assert.assertEquals(-1, XltCharBuffer.valueOf("a").indexOf('b'));
-        Assert.assertEquals(0, XltCharBuffer.valueOf("b").indexOf('b'));
-        Assert.assertEquals(0, XltCharBuffer.valueOf("ba").indexOf('b'));
-        Assert.assertEquals(0, XltCharBuffer.valueOf("bab").indexOf('b'));
-        Assert.assertEquals(0, XltCharBuffer.valueOf("abc").indexOf('a'));
-        Assert.assertEquals(1, XltCharBuffer.valueOf("abc").indexOf('b'));
-        Assert.assertEquals(2, XltCharBuffer.valueOf("abc").indexOf('c'));
-        Assert.assertEquals(-1, XltCharBuffer.valueOf("abc").indexOf('d'));
+        var f = new Object() 
+        {
+            public void test(String s, char c)
+            {
+                var x = XltCharBuffer.valueOf(s);
+                assertEquals(s.indexOf(c), x.indexOf(c));
+            }
+            public void testSubstring(String s, int from, int length, char c)
+            {
+                var x = XltCharBuffer.valueOf(s).viewByLength(from, length);
+                assertEquals(s.substring(from, from + length).indexOf(c), x.indexOf(c));
+            }
+        };
+
+        f.test("", 'a');
+        f.test("abc", 'a');
+        f.test("abc", 'b');
+        f.test("abc", 'c');
+        f.test("aaa", 'c');
+        f.test("aaa", 'a');
+
+        f.test("", 'a');
+        f.testSubstring("AAAabcBBB", 3, 3, 'b');
+        f.testSubstring("abcBBB", 0, 3, 'a');
+        f.testSubstring("AAAabc", 3, 3, 'c');
+    }
+
+    @Test
+    public void indexOf_buffer()
+    {
+        var f = new Object() 
+        {
+            public void test(String s1, String s2)
+            {
+                var x1 = XltCharBuffer.valueOf(s1);
+                var x2 = XltCharBuffer.valueOf(s2);
+                assertEquals(s1.indexOf(s2), x1.indexOf(x2));
+            }
+            // Test method to cover also substring views aka offset problems
+            // To cover all options, we can disable the substring part with from == -1
+            public void test(String s1, int from1, int length1, 
+                             String s2, int from2, int length2)
+            {
+                var x1 = from1 == -1 ? XltCharBuffer.valueOf(s1) : XltCharBuffer.valueOf(s1).viewByLength(from1, length1);
+                var x2 = from2 == -1 ? XltCharBuffer.valueOf(s2) :XltCharBuffer.valueOf(s2).viewByLength(from2, length2);
+                var ss1 = from1 == -1 ? s1 : s1.substring(from1, from1 + length1);
+                var ss2 = from2 == -1 ? s2 : s2.substring(from2, from2 + length2);
+
+                assertEquals(ss1.indexOf(ss2), x1.indexOf(x2));
+            }
+        };
+
+        f.test("", "");
+        f.test("a", "a");
+        f.test("abc", "a");
+        f.test("abc", "b");
+        f.test("abc", "c");
+        f.test("abc", "abc");
+        f.test("abc", "abd");
+
+        f.test("0123456789", 0, 10, "0123456789", 0, 10);
+        f.test("0123456789", 0, 10, "ABCDEFGHIJ", 0, 10);
+
+        f.test("0123456789", 3, 4, "0123456789", 4, 4);
+        f.test("0123456789", 3, 4, "ABCDEFGHIJ", 2, 6);
+        f.test("0123456789", 2, 8, "456", 1, 2);
+
+        f.test("0123456789", -1, 0, "0123456789", 4, 4);
+        f.test("-0123456789-", 1, 10, "0123456789", -1, 0);
+        f.test("0123456789", 3, 7, "ABCDEFGHIJ", -1, 0);
+    }
+
+    @Test
+    public void indexOf_buffer_from()
+    {
+        var f = new Object() 
+        {
+            // Test method to cover also substring views aka offset problems
+            // To cover all options, we can disable the substring part with from == -1
+            public void test(String s1, int from1, int length1, 
+                             String s2, int from2, int length2,
+                             int from)
+            {
+                var x1 = from1 == -1 ? XltCharBuffer.valueOf(s1) : XltCharBuffer.valueOf(s1).viewByLength(from1, length1);
+                var x2 = from2 == -1 ? XltCharBuffer.valueOf(s2) : XltCharBuffer.valueOf(s2).viewByLength(from2, length2);
+                var ss1 = from1 == -1 ? s1 : s1.substring(from1, from1 + length1);
+                var ss2 = from2 == -1 ? s2 : s2.substring(from2, from2 + length2);
+
+                //System.out.format("[%s] %s / %s - %s / %s%n", from, ss1, ss1.indexOf(ss2, from), ss2, x1.indexOf(x2, from));
+                assertEquals(ss1.indexOf(ss2, from), x1.indexOf(x2, from));
+            }
+        };
+        f.test("0123456789", -1, -1, "0123456789", -1, -1, 0);
+        IntStream.range(0, 10).forEach(i -> f.test("0123456789", -1, -1, "89", -1, -1, i));
+        IntStream.range(0, 10).forEach(i -> f.test("0123456789", -1, -1, "A", -1, -1, i));
+        IntStream.range(0, 10).forEach(i -> f.test("012345678B", 1, 9, "ABCDEFGHIJ", 1, 1, i));
     }
 
     @Test
@@ -643,5 +819,123 @@ public class XltCharBufferTest
             assertEquals(XltCharBuffer.valueOf("12"), x4);
         }
 
+    }
+
+    @Test
+    public void endsWith()
+    {
+        var f = new Object() 
+        {
+            // Test method to cover also substring views aka offset problems
+            // To cover all options, we can disable the substring part with from == -1
+            public void test(boolean exp, String s1, int from1, int length1, 
+                             String s2, int from2, int length2)
+            {
+                var x1 = from1 == -1 ? XltCharBuffer.valueOf(s1) : XltCharBuffer.valueOf(s1).viewByLength(from1, length1);
+                var x2 = from2 == -1 ? XltCharBuffer.valueOf(s2) : XltCharBuffer.valueOf(s2).viewByLength(from2, length2);
+
+                assertEquals(exp, x1.endsWith(x2));
+            }
+        };
+        f.test(true, "", -1, 0, "", -1, 0);
+        f.test(true, "A", -1, 0, "A", -1, 0);
+        f.test(true, "AB", -1, 0, "AB", -1, 0);
+        f.test(true, "AB", -1, 0, "B", -1, 0);
+        f.test(false, "AB", -1, 0, "A", -1, 0);
+
+        f.test(true, "AB-trtzui-CD", -1, 0, "##CD", 2, 2);
+        f.test(false, "AB-trtzui-CD", -1, 0, "##AA", 2, 2);
+        f.test(true, "AB-012345-CD", 2, 7, "000345000", 3, 3);
+        f.test(false, "AB-012345-CD", 2, 7, "000345000", 3, 4);
+        f.test(true, "AB-012345-CD", 2, 7, "345", -1, 4);
+    }
+
+    @Test
+    public void startsWith()
+    {
+        var f = new Object() 
+        {
+            public void test(boolean exp, String s1, int from1, int length1, 
+                             String s2, int from2, int length2)
+            {
+                var x1 = from1 == -1 ? XltCharBuffer.valueOf(s1) : XltCharBuffer.valueOf(s1).viewByLength(from1, length1);
+                var x2 = from2 == -1 ? XltCharBuffer.valueOf(s2) : XltCharBuffer.valueOf(s2).viewByLength(from2, length2);
+
+                assertEquals(exp, x1.startsWith(x2));
+            }
+        };
+        f.test(true, "", -1, 0, "", -1, 0);
+        f.test(true, "A", -1, 0, "A", -1, 0);
+        f.test(true, "ABC", -1, 0, "ABC", -1, 0);
+        f.test(false, "ABC", -1, 0, "CBA", -1, 0);
+
+        f.test(true, "---ABC--", 3, 3, "###ABC##", 3, 3);
+        f.test(false, "---ABC--", 3, 3, "###66##", 3, 2);
+    }
+
+    @Test
+    public void lastIndexOf()
+    {
+        var f = new Object() 
+        {
+            public void test(int exp, String s1, int from1, int length1, 
+                             String s2, int from2, int length2)
+            {
+                var x1 = from1 == -1 ? XltCharBuffer.valueOf(s1) : XltCharBuffer.valueOf(s1).viewByLength(from1, length1);
+                var x2 = from2 == -1 ? XltCharBuffer.valueOf(s2) : XltCharBuffer.valueOf(s2).viewByLength(from2, length2);
+
+                assertEquals(exp, x1.lastIndexOf(x2));
+            }
+        };
+        f.test(0, "", -1, 0, "", -1, 0);
+        f.test(0, "A", -1, 0, "A", -1, 0);
+        f.test(-1, "A", -1, 0, "B", -1, 0);
+        f.test(4, "ABCABC", -1, 0, "B", -1, 0);
+        f.test(5, "ABCABB", -1, 0, "B", -1, 0);
+        f.test(3, "ABCABB", -1, 0, "AB", -1, 0);
+        f.test(-1, "ABCABB", -1, 0, "AC", -1, 0);
+
+        f.test(4, "--ABCABC", 2, 6, "B", -1, 0);
+        f.test(5, "--ABCABB", 2, 6, "B", -1, 0);
+        f.test(3, "--ABCABB", 2, 6, "AB", -1, 0);
+        f.test(-1, "--ABCABB", 2, 6, "2B", -1, 0);
+
+        f.test(4, "ABCABC", -1, 0, "-B-", 1, 1);
+        f.test(5, "ABCABB", -1, 0, "-B-", 1, 1);
+        f.test(3, "ABCABB", -1, 0, "-AB-", 1, 2);
+        f.test(-1, "ABCABB", -1, 0, "-1B-", 1, 2);
+
+        f.test(4, "-ABCABC-", 1, 6, "-B-", 1, 1);
+        f.test(5, "-ABCABB-", 1, 6, "-B-", 1, 1);
+        f.test(3, "-ABCABB-", 1, 6, "-AB-", 1, 2);    
+        f.test(-1, "-ABCABB-", 1, 6, "-1B-", 1, 2);    
+    }
+
+    @Test
+    public void lastIndexOf_from()
+    {
+        var f = new Object() 
+        {
+            public void test(int exp, String s1, String s2, int from)
+            {
+                test(exp, s1, -1, -1, s2, -1, -1, from);
+            }
+            
+            public void test(int exp, String s1, int from1, int length1, 
+                             String s2, int from2, int length2, int from)
+            {
+                var x1 = from1 == -1 ? XltCharBuffer.valueOf(s1) : XltCharBuffer.valueOf(s1).viewByLength(from1, length1);
+                var x2 = from2 == -1 ? XltCharBuffer.valueOf(s2) : XltCharBuffer.valueOf(s2).viewByLength(from2, length2);
+
+                assertEquals(exp, x1.lastIndexOf(x2, from));
+            }
+        };
+
+        f.test(0, "", "", 0);
+        f.test(0, "A", "A", 0);
+        f.test(-1, "A", "B", 0);
+        f.test(-1, "", "B", 0);
+        
+        f.test(-1, "A", "BA", 0);
     }
 }

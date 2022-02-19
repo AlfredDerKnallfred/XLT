@@ -18,7 +18,6 @@ package com.xceptance.xlt.report.providers;
 import java.awt.Color;
 import java.io.File;
 import java.math.BigInteger;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +35,7 @@ import org.jfree.data.time.TimeSeries;
 import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
 
+import com.xceptance.common.collection.FastHashMap;
 import com.xceptance.common.util.XltCharBuffer;
 import com.xceptance.xlt.api.engine.Data;
 import com.xceptance.xlt.api.engine.RequestData;
@@ -82,7 +82,7 @@ public class RequestDataProcessor extends BasicTimerDataProcessor
     /**
      * A set of distinct URLs. Contains at most {@link #MAXIMUM_NUMBER_OF_URLS} entries.
      */
-    private final Set<XltCharBuffer> distinctUrlSet = new HashSet<>(2 * MAXIMUM_NUMBER_OF_URLS + 1);
+    private final FastHashMap<XltCharBuffer, XltCharBuffer> distinctUrlSet = new FastHashMap<>(2 * MAXIMUM_NUMBER_OF_URLS + 1, 0.5f);
 
     /**
      * The configured runtime segment boundaries. May be an empty array.
@@ -153,7 +153,7 @@ public class RequestDataProcessor extends BasicTimerDataProcessor
     /**
      * Avoid to ask the set again for the size
      */
-    private boolean distinctUrlSetLimitedReached = false;
+    private int distinctUrlSetLimitedSize;
     
     /**
      * Constructor.
@@ -309,16 +309,12 @@ public class RequestDataProcessor extends BasicTimerDataProcessor
             distinctUrlHashCodeSet.add(reqData.hashCodeOfUrlWithoutFragment());
 
             // remember some URLs (up to the limit)
-            if (distinctUrlSetLimitedReached == false)
+            if (distinctUrlSetLimitedSize < MAXIMUM_NUMBER_OF_URLS)
             {
-                if (distinctUrlSet.size() < MAXIMUM_NUMBER_OF_URLS)
-                {
-                    distinctUrlSet.add(reqData.getUrl());
-                }
-                else
-                {
-                    distinctUrlSetLimitedReached = true;
-                }
+                var url = reqData.getUrl();
+                distinctUrlSet.put(url, url);
+                
+                distinctUrlSetLimitedSize = distinctUrlSet.size();
             }
         }
 
@@ -458,12 +454,12 @@ public class RequestDataProcessor extends BasicTimerDataProcessor
      *            the total number of distinct URLs
      * @return the URL list
      */
-    private UrlData getUrlList(final Set<XltCharBuffer> urls, final int totalUrlCount)
+    private UrlData getUrlList(final FastHashMap<XltCharBuffer, XltCharBuffer> urls, final int totalUrlCount)
     {
         final UrlData urlData = new UrlData();
 
         urlData.total = totalUrlCount;
-        urlData.list = urls.stream().map(XltCharBuffer::toString).collect(Collectors.toList());
+        urlData.list = urls.keys().stream().map(XltCharBuffer::toString).collect(Collectors.toList());
 
         return urlData;
     }

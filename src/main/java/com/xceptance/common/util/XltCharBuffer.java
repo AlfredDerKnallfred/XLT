@@ -37,28 +37,28 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      * Empty array
      */
     private static final char[] EMPTY_ARRAY = new char[0];
-    
+
     /**
      * An empty static XltCharBuffer
      */
     public static final XltCharBuffer EMPTY = new XltCharBuffer(EMPTY_ARRAY);
-    
+
     /**
      * The internal buffer, it is shared!
      */
     private final char[] src;
-    
+
     /**
      * Because we are here dealing with the view of an array, we need a start
      * and a length.
      */
     private final int from;
-    
+
     /**
      * The length of the view of the buffer
      */
     private final int length;
-    
+
     /**
      * The hashcode. It is cached to avoid running the same operation again and 
      * again. The hashcode is identical to a hashcode of a String with the same 
@@ -123,7 +123,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     {
         return EMPTY;
     }
-    
+
     /**
      * Return the character at a position. This code does not run any 
      * checks in regards to pos being correct (>= 0, < length). This will
@@ -270,7 +270,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     {
         return viewByLength(from, this.length - from);
     }
-    
+
     /**
      * Append a charbuffer to a stringbuilder. Internal helper.
      * 
@@ -284,7 +284,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
 
         return target;
     }
-    
+
     /**
      * Creates a new char buffer by merging strings
      * 
@@ -457,7 +457,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     {
         return new XltCharBuffer(s.getCharArray(), 0, s.length());
     }
-    
+
     /**
      * Just return the content of this buffer as string. This is of course
      * a copy operation.
@@ -481,7 +481,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         final char[] target = new char[length];
 
         System.arraycopy(src, from, target, 0, length);
- 
+
         return target;
     }
 
@@ -503,7 +503,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     private static int indexOf(char[] source, int sourceOffset, int sourceCount,
                                char[] target, int targetOffset, int targetCount,
                                int fromIndex) {
-        
+
         if (fromIndex >= sourceCount) {
             return (targetCount == 0 ? sourceCount : -1);
         }
@@ -579,7 +579,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
     {
         return indexOf(this.src, from, length, s.src, s.from, s.length, fromIndex);
     }
-    
+
     /**
      * Checks whether or not a buffer ends with the content of another buffer
      * 
@@ -627,14 +627,29 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      */
     public int lastIndexOf(final XltCharBuffer s, int from) 
     {
-        for (int i = from; i >= 0; i--)
+        // what I search is longer, so it won't match
+        if (s.length > length)
         {
-            int last = indexOf(s, i);
-            if (last > -1)
-            {
-                return last <= from ? last : -1;
-            }
+            return -1;
         }
+        // if the remaining part is too short, it won't match
+        if (from > length - s.length)
+        {
+            from = length - s.length;
+        }
+
+        outer:
+            for (int i = from; i >= 0; i--)
+            {
+                for (int si = 0; si < s.length; si++)
+                {
+                    if (s.charAt(si) != charAt(i + si))
+                    {
+                        continue outer;
+                    }
+                }
+                return i;
+            }
 
         return -1;
     }
@@ -666,13 +681,13 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         while (i3 < last) 
         {
             h = h * (31 * 31 * 31 * 31) + src[i0] * (31 * 31 * 31) + src[i1] * (31 * 31) + src[i2] * 31 + src[i3];
-            
+
             i0 = i3 + 1;
             i1 = i3 + 2;
             i2 = i3 + 3;
             i3 = i3 + 4;
         }
-        
+
         if (i2 < last) 
         {
             h = h * (31 * 31 * 31) + src[i0] * (31 * 31) + src[i1] * (31) + src[i2];
@@ -685,10 +700,10 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         {
             h = h * 31 + src[i0];
         }
-        
+
         return h; 
     }
-    
+
     /**
      * Assume we are not mutating... if we mutate, we would have to reset the hashCode
      * 
@@ -704,15 +719,15 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         }
 
         //return hashCode = hashCodeVectored();
-        
+
         // use the vectored approach for longer strings
         // disabled for now, does not seem to fly well when the entire program runs, while as JMH it is faster
-//        if (length > 50)
-//        {
-//            // cache and return
-//            return hashCode = hashCodeVectored();
-//        }
-        
+        //        if (length > 50)
+        //        {
+        //            // cache and return
+        //            return hashCode = hashCodeVectored();
+        //        }
+
         final int last = length + from;
 
         int h = 0;
@@ -720,7 +735,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         {
             h = (31 * h) + src[i];
         }
-        
+
         return hashCode = h; 
     }
 
@@ -757,12 +772,39 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         return false;
     }
 
+    /*
+     * Returns a {@code CharSequence} that is a subsequence of this sequence.
+     * The subsequence starts with the {@code char} value at the specified index and
+     * ends with the {@code char} value at index {@code end - 1}.  The length
+     * (in {@code char}s) of the
+     * returned sequence is {@code end - start}, so if {@code start == end}
+     * then an empty sequence is returned.
+     *
+     * @param   start   the start index, inclusive
+     * @param   end     the end index, exclusive
+     *
+     * @return  the specified subsequence
+     * */
     @Override
     public CharSequence subSequence(int start, int end)
     {
         return substring(start, end);
     }
 
+    /**
+     * Compares this object with the specified object for order.  Returns a
+     * negative integer, zero, or a positive integer as this object is less
+     * than, equal to, or greater than the specified object.
+     *
+     * <p>The implementor must ensure
+     * {@code sgn(x.compareTo(y)) == -sgn(y.compareTo(x))}
+     * for all {@code x} and {@code y}.  (This
+     * implies that {@code x.compareTo(y)} must throw an exception iff
+     * {@code y.compareTo(x)} throws an exception.)
+     * 
+     * @param other the buffer to compare to
+     * @retuen -1, if this is smaller than other, 0 if the same, 1 if this is larger
+     */
     @Override
     public int compareTo(XltCharBuffer other)
     {
@@ -772,6 +814,6 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
 
     public String toDebugString()
     {
-        return String.format("base=%s\ncurrent=%s\nfrom=%d, length=%d", new String(src), this, from, length);
+        return String.format("Base=%s\nCurrent=%s\nfrom=%d, length=%d", new String(src), this, from, length);
     }
 }

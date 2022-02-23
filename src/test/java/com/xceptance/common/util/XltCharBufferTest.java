@@ -2,6 +2,7 @@ package com.xceptance.common.util;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -34,6 +35,15 @@ public class XltCharBufferTest
         assertEquals(XltCharBuffer.empty(), XltCharBuffer.empty());
         assertSame(XltCharBuffer.empty(), XltCharBuffer.empty());
         assertEquals(0, XltCharBuffer.empty().hashCode());
+    }
+
+    @Test
+    public void emptyWhenNull()
+    {
+        assertEquals(XltCharBuffer.empty(), XltCharBuffer.emptyWhenNull(null));
+
+        var x = XltCharBuffer.valueOf("foo");
+        assertEquals(x, XltCharBuffer.emptyWhenNull(x));
     }
 
     @Test
@@ -276,9 +286,13 @@ public class XltCharBufferTest
             {
                 var x = XltCharBuffer.valueOf(s1, s2, s3, vargs);
                 var e = s1 + s2 + s3;
-                for (String s : vargs)
+
+                if (vargs != null)
                 {
-                    e += s;
+                    for (String s : vargs)
+                    {
+                        e += s;
+                    }
                 }
                 assertEquals(e.length(), x.length());
                 assertTrue(x.equals(XltCharBuffer.valueOf(e)));
@@ -291,6 +305,10 @@ public class XltCharBufferTest
         f.accept("s", "", "", "");
         f.accept("12345", "1234asdfasfd", "098765", "sds");
         f.accept("12345", "1234asdfasfd", "098765", "sds", "aa");
+
+        // fallback to three params
+        f.accept("12345", "1234asdfasfd", "098765", null);
+        f.accept("12345", "1234asdfasfd", "098765", new String[] {});
     }
 
     @Test
@@ -706,6 +724,8 @@ public class XltCharBufferTest
         IntStream.range(0, 10).forEach(i -> f.test("0123456789", -1, -1, "89", -1, -1, i));
         IntStream.range(0, 10).forEach(i -> f.test("0123456789", -1, -1, "A", -1, -1, i));
         IntStream.range(0, 10).forEach(i -> f.test("012345678B", 1, 9, "ABCDEFGHIJ", 1, 1, i));
+
+        f.test("BAAABA", -1, 0, "BA", -1, 0, 3);
     }
 
     @Test
@@ -724,6 +744,11 @@ public class XltCharBufferTest
             final String s = RandomStringUtils.random(i, "0123456789");
             Assert.assertEquals(s.hashCode(), XltCharBuffer.valueOf(s).hashCode());
         }
+
+        // cached
+        var s = XltCharBuffer.valueOf("foobar");
+        Assert.assertEquals("foobar".hashCode(), s.hashCode());
+        Assert.assertEquals("foobar".hashCode(), s.hashCode());
     }
 
     @Test
@@ -848,6 +873,9 @@ public class XltCharBufferTest
         f.test(true, "AB-012345-CD", 2, 7, "000345000", 3, 3);
         f.test(false, "AB-012345-CD", 2, 7, "000345000", 3, 4);
         f.test(true, "AB-012345-CD", 2, 7, "345", -1, 4);
+
+        // length already fails
+        f.test(false, "AB--sadasdfsCD", 2, 7, "IUZTRTZUI", -1, 4);
     }
 
     @Test
@@ -884,7 +912,11 @@ public class XltCharBufferTest
                 var x1 = from1 == -1 ? XltCharBuffer.valueOf(s1) : XltCharBuffer.valueOf(s1).viewByLength(from1, length1);
                 var x2 = from2 == -1 ? XltCharBuffer.valueOf(s2) : XltCharBuffer.valueOf(s2).viewByLength(from2, length2);
 
+                var ss1 = from1 == -1 ? s1 : s1.substring(from1, from1 + length1);
+                var ss2 = from2 == -1 ? s2 : s2.substring(from2, from2 + length2);
+
                 assertEquals(exp, x1.lastIndexOf(x2));
+                assertEquals(ss1.lastIndexOf(ss2), x1.lastIndexOf(x2));
             }
         };
         f.test(0, "", -1, 0, "", -1, 0);
@@ -920,22 +952,161 @@ public class XltCharBufferTest
             {
                 test(exp, s1, -1, -1, s2, -1, -1, from);
             }
-            
+
             public void test(int exp, String s1, int from1, int length1, 
                              String s2, int from2, int length2, int from)
             {
                 var x1 = from1 == -1 ? XltCharBuffer.valueOf(s1) : XltCharBuffer.valueOf(s1).viewByLength(from1, length1);
-                var x2 = from2 == -1 ? XltCharBuffer.valueOf(s2) : XltCharBuffer.valueOf(s2).viewByLength(from2, length2);
+                var x2 = from1 == -1 ? XltCharBuffer.valueOf(s2) : XltCharBuffer.valueOf(s2).viewByLength(from2, length2);
+
+                var ss1 = from1 == -1 ? s1 : s1.substring(from1, from1 + length1);
+                var ss2 = from2 == -1 ? s2 : s2.substring(from2, from2 + length2);
 
                 assertEquals(exp, x1.lastIndexOf(x2, from));
+                // String is our benchmark
+                assertEquals(exp, ss1.lastIndexOf(ss2, from));
+                assertEquals(ss1.lastIndexOf(ss2, from), x1.lastIndexOf(x2, from));
             }
         };
+
+        //        assertEquals(0, "BA".lastIndexOf("BA", 0));
+        f.test(-1, "A", "AA", 0);
+        f.test(-1, "A", "BB", 0);
+
+        f.test(0, "BA", "BA", 0);
+        f.test(0, "BA", "BA", 1);
+        f.test(0, "BA", "BA", 2);
+        f.test(0, "BA", "BA", 3);
+
+        f.test(-1, "AA", "BA", 0);
+        f.test(-1, "AA", "BA", 1);
+        f.test(-1, "AA", "BA", 2);
+        f.test(-1, "AA", "BA", 3);
+
+        f.test(4, "BAAABA", "BA", 4);
+        f.test(0, "BAAABA", "BA", 3);
 
         f.test(0, "", "", 0);
         f.test(0, "A", "A", 0);
         f.test(-1, "A", "B", 0);
         f.test(-1, "", "B", 0);
-        
         f.test(-1, "A", "BA", 0);
+        f.test(-1, "AAAAA", "BA", 10);
+        f.test(3, "AAABA", "BA", 10);
+        f.test(3, "AAABA", "BA", 4);
+        f.test(3, "AAABA", "BA", 3);
+        f.test(-1, "AAABA", "BA", 2);
+
+        f.test(-1, "0123456789", 1,  8, "A", 0, 1, 7);
+        f.test(1, "0123456789", 1,  8, "23", 0, 2, 7);
+        f.test(1, "0123456789", 1,  8, "-23-", 1, 2, 7);
+        f.test(6, "0123-0123-0123", 1,  10, "23", 0, 2, 9);
+
+    }
+
+    @Test
+    public void equalsTest()
+    {
+        // itself
+        var foo = XltCharBuffer.valueOf("foo");
+        assertTrue(foo.equals(foo));
+
+        // null
+        assertFalse(foo.equals(null));
+
+        // other class
+        assertFalse(foo.equals(""));
+
+        // same content
+        var s1 = XltCharBuffer.valueOf("foo");
+        var s2 = XltCharBuffer.valueOf("foo");
+        assertTrue(s1.equals(s2));
+        assertTrue(s2.equals(s1));
+
+        // different content
+        var s3 = XltCharBuffer.valueOf("foo");
+        var s4 = XltCharBuffer.valueOf("FOO");
+        assertFalse(s3.equals(s4));
+        assertFalse(s4.equals(s3));
+
+        var s5 = XltCharBuffer.valueOf("foobar");
+        var s6 = XltCharBuffer.valueOf("megapp");
+        assertFalse(s5.equals(s6));
+        assertFalse(s6.equals(s5));
+
+        var s7 = XltCharBuffer.valueOf("asdf asdf");
+        var s8 = XltCharBuffer.valueOf("098769as8d98fa9s8d09f8a9s8f");
+        assertFalse(s7.equals(s8));
+        assertFalse(s8.equals(s7));
+
+        // same content but another view
+        var c1 = XltCharBuffer.valueOf("---foo--").viewByLength(3, 3);
+        var c2 = XltCharBuffer.valueOf(" foobar--").viewByLength(1, 3);
+        assertTrue(c1.equals(c1));
+        assertTrue(c2.equals(c1));
+    }
+
+    @Test
+    public void subSequence()
+    {
+        {
+            var s = XltCharBuffer.valueOf("").subSequence(0, 0);
+            assertEquals(XltCharBuffer.valueOf(""), s);
+        }
+        {
+            var s = XltCharBuffer.valueOf("foobar").subSequence(0, 6);
+            assertEquals(XltCharBuffer.valueOf("foobar"), s);
+        }
+        {
+            var s = XltCharBuffer.valueOf("foobar").subSequence(1, 5);
+            assertEquals(XltCharBuffer.valueOf("ooba"), s);
+        }
+        {
+            var s = XltCharBuffer.valueOf("_foobar_").viewByLength(1, 5).subSequence(1, 5);
+            assertEquals(XltCharBuffer.valueOf("ooba"), s);
+        }
+    }
+
+    @Test
+    public void compareTo()
+    {
+        {
+            var s1 = XltCharBuffer.valueOf("");
+            var s2 = XltCharBuffer.valueOf("");
+            assertTrue(s1.compareTo(s2) == 0);
+            assertTrue(s2.compareTo(s1) == 0);
+        }  
+        {
+            var s1 = XltCharBuffer.valueOf("abc");
+            var s2 = XltCharBuffer.valueOf("def");
+            assertTrue(s1.compareTo(s2) < 0);
+            assertTrue(s2.compareTo(s1) > 0);
+        }  
+        {
+            var s1 = XltCharBuffer.valueOf("abc");
+            var s2 = XltCharBuffer.valueOf("abc");
+            assertTrue(s1.compareTo(s2) == 0);
+            assertTrue(s2.compareTo(s1) == 0);
+        }  
+        {
+            var s1 = XltCharBuffer.valueOf("ZZakwjefkajskfjksjdkfjsakkfdjasfd");
+            var s2 = XltCharBuffer.valueOf("Alsakdfisudifuaisudifouoisaudf");
+            assertTrue(s1.compareTo(s2) > 0);
+            assertTrue(s2.compareTo(s1) < 0);
+        }  
+        {
+            var s1 = XltCharBuffer.valueOf("aZZZZZa").viewByLength(1, 5);
+            var s2 = XltCharBuffer.valueOf("aAAAAAa").viewByLength(1, 5);;
+            assertTrue(s1.compareTo(s2) > 0);
+            assertTrue(s2.compareTo(s1) < 0);
+        }  
+    }
+
+    @Test
+    public void toDebugString()
+    {
+        assertEquals("Base=\nCurrent=\nfrom=0, length=0", XltCharBuffer.valueOf("").toDebugString());
+        assertEquals("Base=foobar\nCurrent=foobar\nfrom=0, length=6", XltCharBuffer.valueOf("foobar").toDebugString());
+        assertEquals("Base=foobar\nCurrent=ooba\nfrom=1, length=4", XltCharBuffer.valueOf("foobar").viewByLength(1, 4).toDebugString());
     }
 }

@@ -311,7 +311,7 @@ public class RequestDataProcessor extends BasicTimerDataProcessor
             // remember some URLs (up to the limit)
             if (distinctUrlSetLimitedSize < MAXIMUM_NUMBER_OF_URLS)
             {
-                var url = reqData.getUrl();
+                final XltCharBuffer url = reqData.getUrl();
                 distinctUrlSet.put(url, url);
                 
                 distinctUrlSetLimitedSize = distinctUrlSet.size();

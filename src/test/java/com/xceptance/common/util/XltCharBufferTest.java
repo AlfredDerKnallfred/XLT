@@ -6,8 +6,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Array;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -1109,4 +1112,78 @@ public class XltCharBufferTest
         assertEquals("Base=foobar\nCurrent=foobar\nfrom=0, length=6", XltCharBuffer.valueOf("foobar").toDebugString());
         assertEquals("Base=foobar\nCurrent=ooba\nfrom=1, length=4", XltCharBuffer.valueOf("foobar").viewByLength(1, 4).toDebugString());
     }
+
+    @Test
+    public void replace()
+    {
+        {
+            var x = XltCharBuffer.valueOf("");
+            assertEquals("", x.replace('a', "").toString());
+        }
+        {
+            var x = XltCharBuffer.valueOf("a");
+            assertEquals("b", x.replace('a', "b").toString());
+        }
+        {
+            var x = XltCharBuffer.valueOf("abcdefghiuajaua");
+            assertEquals("abcdefghiuajaua", x.replace('0', "b").toString());
+        }
+        {
+            var x = XltCharBuffer.valueOf("aa");
+            assertEquals("bb", x.replace('a', "b").toString());
+            assertEquals("aa", x.replace('a', "a").toString());
+        }
+        {
+            var x = XltCharBuffer.valueOf("aa");
+            assertEquals("aaaa", x.replace('a', "aa").toString());
+        }
+        {
+            var x = XltCharBuffer.valueOf("01abc2").viewByLength(2, 3);
+            assertEquals("aabc", x.replace('a', "aa").toString());
+        }
+    }
+
+    @Test
+    public void split()
+    {
+        var f = new Object() 
+        {
+            public void test(List<String> exp, String s, char splitChar)
+            {
+                var r = XltCharBuffer.valueOf(s).split(splitChar)
+                    .stream()
+                    .map(XltCharBuffer::toString)
+                    .collect(Collectors.toList()).toArray();
+                assertArrayEquals(exp.toArray(),  r);
+            }
+        };
+        
+        f.test(
+               List.of(""), 
+               "", ',');
+        f.test(
+               List.of("a"), 
+               "a", ',');
+        f.test(
+               List.of("abc"), 
+               "abc", ',');
+        f.test(
+               List.of("a", "b", "c"),
+               "a,b,c", ',');
+        f.test(
+               List.of("", "", ""),
+               ",,", ',');
+        f.test(
+               List.of("", "b", "c"),
+               ",b,c", ',');
+        f.test(
+               List.of("a", "b", ""),
+               "a,b,", ',');
+        f.test(
+               List.of("a", "", "c"),
+               "a,,c", ',');
+        f.test(
+               List.of("a", "", "cde"),
+               "a,,cde", ',');
+        }
 }

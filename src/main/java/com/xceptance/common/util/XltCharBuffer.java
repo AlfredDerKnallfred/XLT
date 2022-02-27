@@ -15,6 +15,7 @@
  */
 package com.xceptance.common.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -162,7 +163,7 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      */
     public List<XltCharBuffer> split(final char splitChar)
     {
-        final List<XltCharBuffer> result = new SimpleArrayList<>(10);
+        final List<XltCharBuffer> result = new ArrayList<>();
 
         int last = -1;
         for (int i = 0; i < this.length; i++)
@@ -175,9 +176,18 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
             }
         }
 
-        if (last == -1 || last + 1 < this.length)
+        last++;
+        // in case there is either nothing done yet or
+        // something left
+        if (last == 0 || last < this.length)
         {
-            result.add(this.substring(last + 1, this.length));
+            result.add(this.substring(last, this.length));
+        }
+        else // if (last + 1 == this.length)
+        {
+            // the else if is not needed, this branch
+            // only fires when the del is the last char
+            result.add(XltCharBuffer.empty());
         }
 
         return result;

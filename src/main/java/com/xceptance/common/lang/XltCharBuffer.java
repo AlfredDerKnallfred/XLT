@@ -677,7 +677,8 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      * 
      * Assume we are not mutating... if we mutate, we would have to reset the hashCode
      * 
-     * Taken from JDK 19 - JDK-8282664:
+     * Taken from JDK 19 - JDK-8282664, Code and Idea by Richard Startin
+     * https://twitter.com/richardstartin
      * 
      * @return the hash code
      */

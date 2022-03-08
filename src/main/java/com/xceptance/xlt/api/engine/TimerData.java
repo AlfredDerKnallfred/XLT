@@ -19,7 +19,7 @@ import java.util.List;
 
 import com.xceptance.common.lang.ParseBoolean;
 import com.xceptance.common.lang.ParseNumbers;
-import com.xceptance.common.util.XltCharBuffer;
+import com.xceptance.common.lang.XltCharBuffer;
 
 /**
  * The {@link TimerData} class is the super class for all timer-based data records.

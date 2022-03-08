@@ -5,6 +5,8 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.xceptance.common.lang.XltCharBuffer;
+
 public class CSVUtilsDecodeTest
 {
     private void test_noQuoteConversion(String s, String... expected) 

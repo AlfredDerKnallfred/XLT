@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.xceptance.common.util;
+package com.xceptance.common.lang;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.xceptance.common.lang.OpenStringBuilder;
 
 /**
  * This class does not implement the CharBuffer of the JDK, but uses the idea of a shared
@@ -677,47 +675,11 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
      * You are not supposed to call this directly, it is rather public for testing. This is a trade
      * off between cpu and branches. 
      * 
-     * @return the hash code
-     */
-    public int hashCodeVectored()
-    {
-        final int last = length + from;
-
-        int h = 0;
-        int i0 = from;
-        int i1 = from + 1;
-        int i2 = from + 2;
-        int i3 = from + 3;
-        while (i3 < last) 
-        {
-            h = h * (31 * 31 * 31 * 31) + src[i0] * (31 * 31 * 31) + src[i1] * (31 * 31) + src[i2] * 31 + src[i3];
-
-            i0 = i3 + 1;
-            i1 = i3 + 2;
-            i2 = i3 + 3;
-            i3 = i3 + 4;
-        }
-
-        if (i2 < last) 
-        {
-            h = h * (31 * 31 * 31) + src[i0] * (31 * 31) + src[i1] * (31) + src[i2];
-        }
-        else if (i1 < last) 
-        {
-            h = h * (31 * 31) + src[i0] * (31) + src[i1];
-        }
-        else if (i0 < last) 
-        {
-            h = h * 31 + src[i0];
-        }
-
-        return h; 
-    }
-
-    /**
      * Assume we are not mutating... if we mutate, we would have to reset the hashCode
      * 
-     * @return the hashcode, similar to what a normal string would deliver
+     * Taken from JDK 19 - JDK-8282664:
+     * 
+     * @return the hash code
      */
     @Override
     public int hashCode()
@@ -727,26 +689,30 @@ public class XltCharBuffer implements CharSequence, Comparable<XltCharBuffer>
         {
             return hashCode;
         }
-
-        //return hashCode = hashCodeVectored();
-
-        // use the vectored approach for longer strings
-        // disabled for now, does not seem to fly well when the entire program runs, while as JMH it is faster
-        //        if (length > 50)
-        //        {
-        //            // cache and return
-        //            return hashCode = hashCodeVectored();
-        //        }
-
-        final int last = length + from;
-
+        
         int h = 0;
-        for (int i = from; i < last; i++) 
-        {
-            h = (31 * h) + src[i];
+        int i = from;
+        int l, l2;
+        l = l2 = (length + from);
+        l = l & ~(8 - 1);
+        
+        for (; i < l; i += 8) {
+            h = -1807454463 * h +
+                 1742810335 * src[i+0] +
+                  887503681 * src[i+1] +
+                   28629151 * src[i+2] +
+                     923521 * src[i+3] +
+                      29791 * src[i+4] +
+                        961 * src[i+5] +
+                         31 * src[i+6] +
+                          1 * src[i+7];
         }
-
-        return hashCode = h; 
+        
+        for (; i < l2; i++) {
+            h = 31 * h + src[i];
+        }
+        
+        return h;        
     }
 
     /**

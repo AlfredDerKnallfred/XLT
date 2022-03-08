@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.xceptance.common.util.XltCharBuffer;
+import com.xceptance.common.lang.XltCharBuffer;
 
 
 public class LeanestBufferedReaderAppend_Test

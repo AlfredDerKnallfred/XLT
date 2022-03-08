@@ -18,6 +18,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.xceptance.common.lang.OpenStringBuilder;
+import com.xceptance.common.lang.XltCharBuffer;
 
 public class XltCharBufferTest
 {
@@ -753,25 +754,6 @@ public class XltCharBufferTest
         Assert.assertEquals("foobar".hashCode(), s.hashCode());
         Assert.assertEquals("foobar".hashCode(), s.hashCode());
     }
-
-    @Test
-    public void hashCodeVectored_test()
-    {
-        Assert.assertEquals(new String("").hashCode(), XltCharBuffer.valueOf("").hashCodeVectored());
-        Assert.assertEquals(new String(" ").hashCode(), XltCharBuffer.valueOf(" ").hashCodeVectored());
-        Assert.assertEquals(new String("  ").hashCode(), XltCharBuffer.valueOf("  ").hashCodeVectored());
-        Assert.assertEquals(new String("Foobar").hashCode(), XltCharBuffer.valueOf("Foobar").hashCodeVectored());
-        Assert.assertEquals(new String("Das ist ein Test.").hashCode(), XltCharBuffer.valueOf("Das ist ein Test.").hashCodeVectored());
-        Assert.assertEquals(new String("ist").hashCode(), XltCharBuffer.valueOf("Das ist ein Test.").substring(4, 7).hashCodeVectored());
-
-        Assert.assertEquals(new String("0").hashCode(), XltCharBuffer.valueOf("0").hashCodeVectored());
-        Assert.assertEquals(new String("01").hashCode(), XltCharBuffer.valueOf("01").hashCodeVectored());
-        Assert.assertEquals(new String("012").hashCode(), XltCharBuffer.valueOf("012").hashCodeVectored());
-        Assert.assertEquals(new String("0123").hashCode(), XltCharBuffer.valueOf("0123").hashCodeVectored());
-        Assert.assertEquals(new String("01234").hashCode(), XltCharBuffer.valueOf("01234").hashCodeVectored());
-        Assert.assertEquals(new String("012345").hashCode(), XltCharBuffer.valueOf("012345").hashCodeVectored());
-    }
-
 
     @Test
     public void compare()

@@ -17,7 +17,7 @@ package com.xceptance.xlt.api.engine;
 
 import java.util.List;
 
-import com.xceptance.common.util.XltCharBuffer;
+import com.xceptance.common.lang.XltCharBuffer;
 
 /**
  * The {@link CustomValue} can store a single 'double' value.

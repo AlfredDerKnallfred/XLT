@@ -29,8 +29,8 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileType;
 
 import com.xceptance.common.io.LeanestBufferedReaderAppend;
+import com.xceptance.common.lang.XltCharBuffer;
 import com.xceptance.common.util.SimpleArrayList;
-import com.xceptance.common.util.XltCharBuffer;
 import com.xceptance.xlt.common.XltConstants;
 
 /**

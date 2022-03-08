@@ -23,8 +23,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.xceptance.common.lang.XltCharBuffer;
 import com.xceptance.common.util.CsvUtils;
-import com.xceptance.common.util.XltCharBuffer;
 import com.xceptance.xlt.AbstractXLTTestCase;
 import com.xceptance.xlt.TestWrapper;
 import com.xceptance.xlt.api.util.XltCharBufferUtil;

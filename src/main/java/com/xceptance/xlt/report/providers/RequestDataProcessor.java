@@ -36,7 +36,7 @@ import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
 
 import com.xceptance.common.collection.FastHashMap;
-import com.xceptance.common.util.XltCharBuffer;
+import com.xceptance.common.lang.XltCharBuffer;
 import com.xceptance.xlt.api.engine.Data;
 import com.xceptance.xlt.api.engine.RequestData;
 import com.xceptance.xlt.api.report.AbstractReportProvider;

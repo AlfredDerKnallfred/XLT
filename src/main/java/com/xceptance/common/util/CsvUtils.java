@@ -130,6 +130,24 @@ public final class CsvUtils
     }
 
     /**
+     * Encodes the given fields to a CSV-encoded data record. This
+     * implementation is for compatibility reasons here. Prefer the
+     * list version instead.
+     * 
+     * @param fields
+     *            the plain fields
+     * @return the CSV-encoded data record
+     * 
+     * @deprecated Prefer {@link CsvUtils#encode(List)}
+     */
+    @Deprecated
+    public static String encode(final String[] fields)
+    {
+        final List<String> list = List.of(fields);
+        return encode(list, COMMA);
+    }
+    
+    /**
      * Encodes one field of the data record.
      * 
      * @param s

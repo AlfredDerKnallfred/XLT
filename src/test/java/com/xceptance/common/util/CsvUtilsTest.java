@@ -100,12 +100,6 @@ public class CsvUtilsTest
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testEncodeWithNullArray()
-    {
-        CsvUtils.encode(null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void testEncodeWithEmptyArray()
     {
         CsvUtils.encode(new String[0]);

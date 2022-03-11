@@ -25,26 +25,6 @@ package com.xceptance.common.lang;
 public class StringHasher
 {
     /**
-     * Hashes a string up to a terminal character excluding it. Will 
-     * return the regular hash code if the terminal character is not included.
-     * 
-     * @param s the string to return the hash code for
-     * @param limitingChar the limiting character when to stop 
-     */
-    public static int hashCodeWithLimit(final String s, final char limitingChar)
-    {
-        final int pos = s.indexOf(limitingChar);
-        if (pos >= 0)
-        {
-            return hashCodeWithLimit((CharSequence)s, limitingChar);
-        }
-        else
-        {
-            return s.hashCode();
-        }
-    }    
-    
-    /**
      * Hashes the characters up to the limiter excluding it. If there is no limiter, this
      * result matches the hashcode of a similar string.
      * 
@@ -54,23 +34,25 @@ public class StringHasher
     public static int hashCodeWithLimit(final CharSequence s, final char limitingChar)
     {
         int hash = 0;
-        
+
         final int length = s.length();
         for (int i = 0; i < length; i++) 
         {
             final char c = s.charAt(i);
-            
+
             if (c != limitingChar)
             {
-                hash = 31 * hash + c;
+                final int h1 = hash << 5;
+                final int h2 = c - hash;
+                hash = h1 + h2;
             }
             else
             {
-                // early end reached
                 break;
             }
+
         }
-        
+
         return hash;
     }
 }

@@ -208,7 +208,7 @@ class DataReaderThread implements Runnable
         try (final LeanestBufferedReaderAppend reader = new LeanestBufferedReaderAppend(
                                                                   new InputStreamReader(
                                                                       isCompressed ? 
-                                                                                  new GZIPInputStream(file.getContent().getInputStream()) : file.getContent().getInputStream()
+                                                                                  new GZIPInputStream(file.getContent().getInputStream(), 1024 * 16) : file.getContent().getInputStream()
                                                                                   , XltConstants.UTF8_ENCODING)))
         {
             List<XltCharBuffer> lines = new SimpleArrayList<>(chunkSize);

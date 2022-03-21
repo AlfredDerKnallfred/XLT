@@ -71,7 +71,7 @@ public final class ParseNumbers
             final int d = s.charAt(i);
             if (d < '0' || d > '9')
             {
-                return Long.parseLong(s.toString());
+                throw new NumberFormatException("Not a long " + s.toString());
             }
 
             value = ((value << 3) + (value << 1));
@@ -122,7 +122,7 @@ public final class ParseNumbers
             final int d = s.charAt(i);
             if (d < '0' || d > '9')
             {
-                return Integer.parseInt(s.toString());
+                throw new NumberFormatException("Not an int " + s.toString());
             }
 
             value = ((value << 3) + (value << 1));
@@ -182,7 +182,7 @@ public final class ParseNumbers
             }
             if (d < '0' || d > '9')
             {
-                return Double.parseDouble(s.toString());
+                throw new NumberFormatException("Not a double " + s.toString());
             }
 
             value = ((value << 3) + (value << 1));

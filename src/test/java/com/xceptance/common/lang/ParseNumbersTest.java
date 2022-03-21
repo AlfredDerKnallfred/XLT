@@ -129,14 +129,23 @@ public class ParseNumbersTest
         }
     }
 
+
+    /**
+     * Test method for {@link com.xceptance.common.parsenumbers.FastParseNumbers#fastParseInt(java.lang.String)}.
+     */
+    @Test(expected = NumberFormatException.class)
+    public final void testNumberFormatExceptionInt_Void()
+    {
+        ParseNumbers.parseInt("12a");
+    }
+    
     /**
      * Test method for {@link com.xceptance.common.parsenumbers.FastParseNumbers#fastParseInt(java.lang.String)}.
      */
     @Test(expected = NumberFormatException.class)
     public final void testNumberFormatExceptionInt_Empty()
     {
-        final String s = "";
-        ParseNumbers.parseInt(XltCharBuffer.valueOf(s));
+        ParseNumbers.parseInt("");
     }
 
     /**
@@ -145,8 +154,7 @@ public class ParseNumbersTest
     @Test(expected = NumberFormatException.class)
     public final void testNumberFormatExceptionInt_Space()
     {
-        final String s = " ";
-        ParseNumbers.parseInt(XltCharBuffer.valueOf(s));
+        ParseNumbers.parseInt(" ");
     }
 
     /**
@@ -155,8 +163,7 @@ public class ParseNumbersTest
     @Test(expected = NumberFormatException.class)
     public final void testNumberFormatExceptionInt_WrongCharacter()
     {
-        final String s = "aaa";
-        ParseNumbers.parseInt(XltCharBuffer.valueOf(s));
+        ParseNumbers.parseInt("aaa");
     }
 
     /**
@@ -172,10 +179,18 @@ public class ParseNumbersTest
      * Test method for {@link com.xceptance.common.parsenumbers.FastParseNumbers#fastParseInt(java.lang.String)}.
      */
     @Test(expected = NumberFormatException.class)
+    public final void testNumberFormatExceptionLong_Void()
+    {
+        ParseNumbers.parseInt("12a");
+    }
+    
+    /**
+     * Test method for {@link com.xceptance.common.parsenumbers.FastParseNumbers#fastParseInt(java.lang.String)}.
+     */
+    @Test(expected = NumberFormatException.class)
     public final void testNumberFormatExceptionLong_Empty()
     {
-        final String s = "";
-        ParseNumbers.parseLong(XltCharBuffer.valueOf(s));
+        ParseNumbers.parseLong("");
     }
 
     /**
@@ -184,8 +199,7 @@ public class ParseNumbersTest
     @Test(expected = NumberFormatException.class)
     public final void testNumberFormatExceptionLong_Space()
     {
-        final String s = " ";
-        ParseNumbers.parseLong(XltCharBuffer.valueOf(s));
+        ParseNumbers.parseLong(" ");
     }
 
     /**
@@ -194,8 +208,7 @@ public class ParseNumbersTest
     @Test(expected = NumberFormatException.class)
     public final void testNumberFormatExceptionLong_WrongCharacter()
     {
-        final String s = "aaa";
-        ParseNumbers.parseLong(XltCharBuffer.valueOf(s));
+        ParseNumbers.parseLong("2aa");
     }
 
     /**
@@ -258,5 +271,50 @@ public class ParseNumbersTest
 
         s = "10.100000000000001"; Assert.assertTrue(Double.parseDouble(s) == ParseNumbers.parseDouble(XltCharBuffer.valueOf(s)));
         s = "-141.001"; Assert.assertTrue(Double.parseDouble(s) == ParseNumbers.parseDouble(XltCharBuffer.valueOf(s)));
+    }
+    
+    /**
+     * Test method for {@link com.xceptance.common.parsenumbers.FastParseNumbers#fastParseInt(java.lang.String)}.
+     */
+    @Test(expected = NumberFormatException.class)
+    public final void testNumberFormatExceptionDouble_Void()
+    {
+        ParseNumbers.parseDouble("12,11");
+    }
+    
+    /**
+     * Test method for {@link com.xceptance.common.parsenumbers.FastParseNumbers#fastParseInt(java.lang.String)}.
+     */
+    @Test(expected = NumberFormatException.class)
+    public final void testNumberFormatExceptionDouble_Empty()
+    {
+        ParseNumbers.parseDouble("");
+    }
+
+    /**
+     * Test method for {@link com.xceptance.common.parsenumbers.FastParseNumbers#fastParseInt(java.lang.String)}.
+     */
+    @Test(expected = NumberFormatException.class)
+    public final void testNumberFormatExceptionDouble_Space()
+    {
+        ParseNumbers.parseDouble(" ");
+    }
+
+    /**
+     * Test method for {@link com.xceptance.common.parsenumbers.FastParseNumbers#fastParseInt(java.lang.String)}.
+     */
+    @Test(expected = NumberFormatException.class)
+    public final void testNumberFormatExceptionDouble_WrongCharacter()
+    {
+        ParseNumbers.parseDouble("aaa");
+    }
+
+    /**
+     * Test method for {@link com.xceptance.common.parsenumbers.FastParseNumbers#fastParseInt(java.lang.String)}.
+     */
+    @Test(expected = NumberFormatException.class)
+    public final void testNumberFormatExceptionDouble_Null()
+    {
+        ParseNumbers.parseDouble(null);
     }
 }

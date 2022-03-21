@@ -32,7 +32,7 @@ import org.apache.commons.text.matcher.StringMatcher;
  *
  * @since 7.0
  */
-public class OpenStringBuilder implements CharSequence, Appendable, Serializable {
+public class OpenStringBuilder implements CharSequence, Appendable {
 
     /**
      * The size of the string {@code "false"}.
@@ -48,13 +48,6 @@ public class OpenStringBuilder implements CharSequence, Appendable, Serializable
      * The extra capacity for new builders.
      */
     static final int CAPACITY = 32;
-
-    /**
-     * Required for serialization support.
-     *
-     * @see java.io.Serializable
-     */
-    private static final long serialVersionUID = 1L;
 
     /** Internal data storage. */
     char[] buffer; // package-protected for test code use only

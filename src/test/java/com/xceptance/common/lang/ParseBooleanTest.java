@@ -23,24 +23,44 @@ import org.junit.Test;
 public class ParseBooleanTest 
 {
     @Test
-    public void normal()
+    public void normalTrue()
     {
         assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("true")));
+    }
+
+    @Test
+    public void normalFalse()
+    {
         assertFalse(ParseBoolean.parse(XltCharBuffer.valueOf("false")));
         assertFalse(ParseBoolean.parse(XltCharBuffer.valueOf("trueish")));
         assertFalse(ParseBoolean.parse(XltCharBuffer.valueOf("wahr")));
         assertFalse(ParseBoolean.parse(XltCharBuffer.valueOf("")));
-
-        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("TRUE")));
-        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("truE")));
-        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("True")));
-        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("tRue")));
-        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("trUe")));
     }
+    
+    @Test
+    public void slowpath()
+    {
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("TRUE")));
+        
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("truE")));
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("trUe")));
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("tRue")));
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("True")));
 
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("TRue")));
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("trUE")));
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("TruE")));
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("tRUe")));
+
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("TRUe")));
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("tRUE")));
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("TRuE")));
+        assertTrue(ParseBoolean.parse(XltCharBuffer.valueOf("tRUe")));
+    }
+    
     @Test(expected = NullPointerException.class)
     public void nullNPE()
     {
-        assertTrue(ParseBoolean.parse(null));
+        ParseBoolean.parse(null);
     }
 }

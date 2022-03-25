@@ -272,6 +272,7 @@ public class LeanestBufferedReaderAppend_Test
         // files are compressed to preserve line endings with GIT
         compare("/timers.csv.gz");
         compare("/timers-dos.csv.gz");
+        compare("/timers-mac.csv.gz");
     }
     
     public void compare(String fileName) throws IOException

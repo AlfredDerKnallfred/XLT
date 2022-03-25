@@ -5,7 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Object-2-object map based on IntIntMap4a
+ * Simple hash map implementation taken from here
+ * https://github.com/mikvor/hashmapTest/blob/master/src/main/java/map/objobj/ObjObjMap.java
+ * No concrete license specified at the source. The project is public domain.
+ * 
+ * Null support was removed.
  */
 public class FastHashMap<K, V>
 {
@@ -14,10 +18,6 @@ public class FastHashMap<K, V>
 
     /** Keys and values */
     private Object[] m_data;
-
-    /** Value for the null key (if inserted into a map) */
-    private Object m_nullValue;
-    private boolean m_hasNull;
 
     /** Fill factor, must be between (0 and 1) */
     private final float m_fillFactor;
@@ -41,7 +41,7 @@ public class FastHashMap<K, V>
             throw new IllegalArgumentException( "FillFactor must be in (0, 1)" );
         if ( size <= 0 )
             throw new IllegalArgumentException( "Size must be positive!" );
-        final int capacity = FastHashMapTools.arraySize(size, fillFactor);
+        final int capacity = arraySize(size, fillFactor);
         m_mask = capacity - 1;
         m_mask2 = capacity * 2 - 1;
         m_fillFactor = fillFactor;
@@ -76,9 +76,6 @@ public class FastHashMap<K, V>
 
     public V put( final K key, final V value )
     {
-        if ( key == null )
-            return insertNullKey(value);
-
         int ptr = getStartIndex(key) << 1;
         Object k = m_data[ptr];
 
@@ -135,9 +132,6 @@ public class FastHashMap<K, V>
 
     public V remove( final K key )
     {
-        if ( key == null )
-            return removeNullKey();
-
         int ptr = getStartIndex(key) << 1;
         Object k = m_data[ ptr ];
         if ( k == FREE_KEY )
@@ -173,38 +167,6 @@ public class FastHashMap<K, V>
         }
     }
 
-    private V insertNullKey(final V value)
-    {
-        if ( m_hasNull )
-        {
-            final Object ret = m_nullValue;
-            m_nullValue = value;
-            return (V) ret;
-        }
-        else
-        {
-            m_nullValue = value;
-            ++m_size;
-            return null;
-        }
-    }
-
-    private V removeNullKey()
-    {
-        if ( m_hasNull )
-        {
-            final Object ret = m_nullValue;
-            m_nullValue = null;
-            m_hasNull = false;
-            --m_size;
-            return (V) ret;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
     public int size()
     {
         return m_size;
@@ -222,7 +184,7 @@ public class FastHashMap<K, V>
         m_data = new Object[ newCapacity ];
         Arrays.fill( m_data, FREE_KEY );
 
-        m_size = m_hasNull ? 1 : 0;
+        m_size = 0;
 
         for ( int i = 0; i < oldCapacity; i += 2 ) {
             final Object oldKey = oldData[ i ];
@@ -280,4 +242,35 @@ public class FastHashMap<K, V>
         //key is not null here
         return key.hashCode() & m_mask;
     }
+    
+    /** Return the least power of two greater than or equal to the specified value.
+    *
+    * <p>Note that this function will return 1 when the argument is 0.
+    *
+    * @param x a long integer smaller than or equal to 2<sup>62</sup>.
+    * @return the least power of two greater than or equal to the specified value.
+    */
+   public static long nextPowerOfTwo( long x ) {
+       if ( x == 0 ) return 1;
+       x--;
+       x |= x >> 1;
+       x |= x >> 2;
+       x |= x >> 4;
+       x |= x >> 8;
+       x |= x >> 16;
+       return ( x | x >> 32 ) + 1;
+   }
+
+   /** Returns the least power of two smaller than or equal to 2<sup>30</sup> and larger than or equal to <code>Math.ceil( expected / f )</code>.
+    *
+    * @param expected the expected number of elements in a hash table.
+    * @param f the load factor.
+    * @return the minimum possible size for a backing array.
+    * @throws IllegalArgumentException if the necessary size is larger than 2<sup>30</sup>.
+    */
+   public static int arraySize( final int expected, final float f ) {
+       final long s = Math.max( 2, nextPowerOfTwo( (long)Math.ceil( expected / f ) ) );
+       if ( s > (1 << 30) ) throw new IllegalArgumentException( "Too large (" + expected + " expected elements with load factor " + f + ")" );
+       return (int)s;
+   }
 }

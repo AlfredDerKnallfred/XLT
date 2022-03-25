@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.Test;
 
@@ -78,6 +79,9 @@ public class FastHashMapTest
             assertTrue(k.contains("ee"));
             assertTrue(k.contains("zz"));
         }
+        
+        // ask for something unknown
+        assertNull(f.get("unknown"));
     }
     
     @Test
@@ -132,9 +136,80 @@ public class FastHashMapTest
         assertNull(f.get("d"));
         assertNull(f.get("b"));
 
+        // remove again
+        assertNull(f.remove("b"));
+        assertNull(f.remove("d"));
+        
         f.put("d", 6);
         f.put("b", 7);
         assertEquals(Integer.valueOf(7), f.get("b"));
         assertEquals(Integer.valueOf(6), f.get("d"));
     }
+
+    @Test
+    public void collision()
+    {
+        var f = new FastHashMap<MockKey<String>, String>(13, 0.5f);
+        IntStream.range(0, 15).forEach(i -> {
+            f.put(new MockKey<String>(12, "k" + i), "v" + i);
+        }); 
+        
+        assertEquals(15, f.size());
+        
+        IntStream.range(0, 15).forEach(i -> {
+            assertEquals("v" + i, f.get(new MockKey<String>(12, "k" + i)));
+        });
+
+        // round 2
+        IntStream.range(0, 20).forEach(i -> {
+            f.put(new MockKey<String>(12, "k" + i), "v" + i);
+        }); 
+        
+        assertEquals(20, f.size());
+        
+        IntStream.range(0, 20).forEach(i -> {
+            assertEquals("v" + i, f.get(new MockKey<String>(12, "k" + i)));
+        });
+        
+        // round 3
+        IntStream.range(0, 10).forEach(i -> {
+            assertEquals("v" + i, f.remove(new MockKey<String>(12, "k" + i)));
+        });
+        IntStream.range(10, 20).forEach(i -> {
+            assertEquals("v" + i, f.get(new MockKey<String>(12, "k" + i)));
+        });
+    }
+    
+    static class MockKey<T>
+    {
+        public final T key;
+        public final int hash; 
+        
+        public MockKey(int hash, T key)
+        {
+            this.hash = hash;
+            this.key = key;
+        }
+        
+        @Override
+        public int hashCode()
+        {
+            return hash;
+        }
+        
+        @Override 
+        public boolean equals(Object o)
+        {
+            var t = (MockKey<T>) o;
+            return hash == o.hashCode() && key.equals(t.key);
+        }
+
+        @Override
+        public String toString()
+        {
+            return "MockKey [key=" + key + ", hash=" + hash + "]";
+        }
+        
+    }
 }
+

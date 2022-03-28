@@ -170,20 +170,19 @@ public final class CsvUtils
      */
     public static String encodeField(final String s, final char fieldSeparator)
     {
-        if (s == null || s.length() == 0)
+        if (s == null)
         {
             return s;
         }
 
-        final char[] sourceChars = s.toCharArray();
-        final int sourceLength = sourceChars.length;
+        final int sourceLength = s.length();
 
         // check whether we have to quote at all
         boolean needsQuoting = false;
         int quotesRead = 0;
         for (int i = 0; i < sourceLength; i++)
         {
-            final char c = sourceChars[i];
+            final char c = s.charAt(i);
             if (c == QUOTE_CHAR)
             {
                 quotesRead++;
@@ -203,10 +202,12 @@ public final class CsvUtils
         // quote
         final char[] targetChars = new char[sourceLength + quotesRead + 2];
 
+        targetChars[0] = QUOTE_CHAR;
+
         int j = 1;
         for (int i = 0; i < sourceLength; i++, j++)
         {
-            final char c = sourceChars[i];
+            final char c = s.charAt(i);
 
             if (c == QUOTE_CHAR)
             {
@@ -217,7 +218,6 @@ public final class CsvUtils
             targetChars[j] = c;
         }
 
-        targetChars[0] = QUOTE_CHAR;
         targetChars[j] = QUOTE_CHAR;
 
         return new String(targetChars);
@@ -259,8 +259,6 @@ public final class CsvUtils
     public static String encode(final List<String> fields, final char fieldSeparator)
     {
         final StringBuilder result = new StringBuilder(256);
-        boolean isFirstField = true;
-
         final int length = fields.size();
         
         for (int i = 0; i < length; i++)
@@ -273,11 +271,7 @@ public final class CsvUtils
             }
 
             // first append the separator except for the first entry
-            if (isFirstField)
-            {
-                isFirstField = false;
-            }
-            else
+            if (i != 0)
             {
                 result.append(fieldSeparator);
             }

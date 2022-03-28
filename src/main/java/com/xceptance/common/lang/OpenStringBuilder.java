@@ -28,7 +28,7 @@ import org.apache.commons.text.matcher.StringMatcher;
 
 /**
  * This is a StringBuilder with open access to the char array to avoid copy operations. This is 
- * based on TextStringBuilder from Apache Commons with some modifcations.
+ * based on TextStringBuilder from Apache Commons with some modifications.
  *
  * @since 7.0
  */

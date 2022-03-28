@@ -1,5 +1,7 @@
 package com.xceptance.common.util;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Assert;
@@ -81,7 +83,7 @@ public class SimpleArrayListTest
 
         List<List<Integer>> result = list.partition(3);
         Assert.assertEquals(3, result.size());
-        
+
         Assert.assertEquals(2, result.get(0).size());
         Assert.assertEquals(new Integer(1), result.get(0).get(0));
         Assert.assertEquals(new Integer(2), result.get(0).get(1));
@@ -111,19 +113,19 @@ public class SimpleArrayListTest
 
         Assert.assertEquals(1, result.get(0).size());
         Assert.assertEquals(new Integer(1), result.get(0).get(0));
-        
+
         Assert.assertEquals(1, result.get(1).size());
         Assert.assertEquals(new Integer(2), result.get(1).get(0));
 
         Assert.assertEquals(1, result.get(2).size());
         Assert.assertEquals(new Integer(3), result.get(2).get(0));
-        
+
         Assert.assertEquals(1, result.get(3).size());
         Assert.assertEquals(new Integer(4), result.get(3).get(0));
 
         Assert.assertEquals(1, result.get(4).size());
         Assert.assertEquals(new Integer(5), result.get(4).get(0));
-        
+
         Assert.assertEquals(1, result.get(5).size());
         Assert.assertEquals(new Integer(6), result.get(5).get(0));
     }
@@ -141,7 +143,7 @@ public class SimpleArrayListTest
 
         List<List<Integer>> result = list.partition(3);
         Assert.assertEquals(3, result.size());
-        
+
         Assert.assertEquals(2, result.get(0).size());
         Assert.assertEquals(new Integer(1), result.get(0).get(0));
         Assert.assertEquals(new Integer(2), result.get(0).get(1));
@@ -167,15 +169,15 @@ public class SimpleArrayListTest
 
         Assert.assertEquals(1, result.get(0).size());
         Assert.assertEquals(new Integer(1), result.get(0).get(0));
-        
+
         Assert.assertEquals(1, result.get(1).size());
         Assert.assertEquals(new Integer(2), result.get(1).get(0));
 
         Assert.assertEquals(1, result.get(2).size());
         Assert.assertEquals(new Integer(3), result.get(2).get(0));
-        
+
     }
-    
+
     @Test
     public void clear()
     {
@@ -192,11 +194,11 @@ public class SimpleArrayListTest
         Assert.assertEquals("c", l.get(2));
         Assert.assertEquals("d", l.get(3));
         Assert.assertEquals("e", l.get(4));
-        
+
         l.clear();
-        
+
         Assert.assertEquals(0, l.size());
-        
+
         // we are not checking ranges or such... hence this now works!!!
         Assert.assertEquals("a", l.get(0));
 
@@ -206,5 +208,38 @@ public class SimpleArrayListTest
         Assert.assertEquals(1, l.size());
         Assert.assertEquals("e1", l.get(0));
 
+    }
+
+    @Test 
+    public void toArray()
+    {
+        final SimpleArrayList<String> l = new SimpleArrayList<>(4);
+        l.add("a");
+        l.add("b");
+        l.add("c");
+        l.add("d");
+        l.add("e");
+        Assert.assertEquals(5, l.size());        
+
+        // we will get
+        {
+            var a = l.toArray();
+            Assert.assertEquals(5, a.length);
+            Assert.assertEquals("a", a[0]);
+            Assert.assertEquals("b", a[1]);
+            Assert.assertEquals("c", a[2]);
+            Assert.assertEquals("d", a[3]);
+            Assert.assertEquals("e", a[4]);
+        }
+        // we will get
+        {
+            var a = l.toArray(new String[0]);
+            Assert.assertEquals(5, a.length);
+            Assert.assertEquals("a", a[0]);
+            Assert.assertEquals("b", a[1]);
+            Assert.assertEquals("c", a[2]);
+            Assert.assertEquals("d", a[3]);
+            Assert.assertEquals("e", a[4]);
+        }
     }
 }

@@ -6,55 +6,117 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+/**
+ * Inexpensive (partial) list implementation. Not fully implemented, just what is needed. As soon as
+ * iterators and other things are involved, the memory savings we wanted are gone.
+ * 
+ * Minimal checks for data correctness!! This is tuned for speed not elegance or safety.
+ * 
+ * @author rschwietzke
+ *
+ * @since 7.0.0
+ */
 public class SimpleArrayList<T> implements List<T>
 {
-    Object[] data;
-    int size;
+    private T[] data;
+    private int size;
 
+    /**
+     * Creates a new list wrapper from an existing one. This is not copying anything rather
+     * referencing it. Make sure that you understand that!
+     * 
+     * @param list
+     */
     SimpleArrayList(final SimpleArrayList<T> list)
     {
         data = list.data;
         size = list.size;
     }
-    
+
+    /**
+     * Create a new list with a default capacity.
+     * @param capacity the capacity 
+     */
     public SimpleArrayList(final int capacity)
     {
-        data = new Object[capacity];
+        data = (T[]) new Object[capacity];
     }
-    
-    public boolean add(T o)
+
+    /**
+     * Add an element to the end of the list
+     * 
+     * @param element the element to add
+     * @return true if added and for this impl it is always true
+     */
+    public boolean add(T element)
     {
         final int length = data.length;
         if (size == length)
         {
-            final Object[] newData = new Object[data.length << 1];
+            final T[] newData = (T[]) new Object[data.length << 1];
             System.arraycopy(data, 0, newData, 0, length);
             data = newData;
         }
 
-        data[size] = o;
+        data[size] = element;
         size++;
-        
+
         return true;
     }
-    
+
+    /**
+     * Return an element at index. No range checks at all. 
+     * 
+     * @param index the position
+     * @return the element at this position
+     */
     @SuppressWarnings("unchecked")
     public T get(int index)
     {
         return (T) data[index];
     }
 
+    /**
+     * Returns the size of this list
+     */
     public int size()
     {
         return size;
     }
-    
-    @SuppressWarnings("unchecked")
-    public T[] toArray() 
+
+    /**
+     * Creates an array of the elements. This is a copy operation!
+     * 
+     * @return an array of the elements
+     */
+    @Override
+    public Object[] toArray() 
     {
-        return (T[]) Arrays.copyOf(data, size);
+        return Arrays.copyOf(data, size);
+    }
+
+    /**
+     * Creates an array of the elements. This is a copy operation!
+     * 
+     * @return an array of the elements
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T[] toArray(T[] array) 
+    {
+        return (T[]) Arrays.copyOf(data, size, array.getClass());
     }
     
+    /**
+     * Clears the list by setting the size to zero. It does not release any
+     * elements for performance purposes. 
+     */
+    @Override
+    public void clear()
+    {
+        size = 0;
+    }
+
     /**
      * Returns view partitions on the underlying list. If the count is larger than size
      * you get back the maximum possible list number with one element each. If count 
@@ -74,9 +136,9 @@ public class SimpleArrayList<T> implements List<T>
         {
             _count = count <= 0 ? 1 : count;
         }
-        
+
         final SimpleArrayList<List<T>> result = new SimpleArrayList<>(count);
-        
+
         final int newSize = (int) Math.ceil((double) size / (double) _count); 
         for (int i = 0; i < _count; i++)
         {
@@ -88,28 +150,28 @@ public class SimpleArrayList<T> implements List<T>
             }
             result.add(new Partition<>(this, from, to));
         }
-        
+
         return result;
     }
-    
+
     class Partition<K> extends SimpleArrayList<K>
     {
         private final int from;
         private final int size;
-        
+
         public Partition(final SimpleArrayList<K> list, final int from, final int to)
         {
             super(list);
-            
+
             this.from = from;
             this.size = to - from + 1;
         }
-     
+
         public boolean add(K o)
         {
             throw new RuntimeException("Cannot modify the partition");
         }
-        
+
         public K get(int index)
         {
             return (K) super.get(index + from);
@@ -119,143 +181,113 @@ public class SimpleArrayList<T> implements List<T>
         {
             return size;
         }
-        
+
         public K[] toArray() 
         {
             throw new RuntimeException("Cannot modify the partition");
         }
-        
+
     }
-    
+
     @Override
     public boolean isEmpty()
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public boolean contains(Object o)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");    
     }
 
     @Override
     public Iterator<T> iterator()
     {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public <T> T[] toArray(T[] a)
-    {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException("unimplemented");    
     }
 
     @Override
     public boolean remove(Object o)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");    
     }
 
     @Override
     public boolean containsAll(Collection<?> c)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");    
     }
 
     @Override
     public boolean addAll(Collection<? extends T> c)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends T> c)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public boolean removeAll(Collection<?> c)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public boolean retainAll(Collection<?> c)
     {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void clear()
-    {
-        size = 0;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public T set(int index, T element)
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public void add(int index, T element)
     {
-        // TODO Auto-generated method stub
-        
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public T remove(int index)
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public int indexOf(Object o)
     {
-        // TODO Auto-generated method stub
-        return 0;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public int lastIndexOf(Object o)
     {
-        // TODO Auto-generated method stub
-        return 0;
+        throw new IllegalArgumentException("unimplemented");    
     }
 
     @Override
     public ListIterator<T> listIterator()
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public ListIterator<T> listIterator(int index)
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public List<T> subList(int fromIndex, int toIndex)
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException("unimplemented");
     }
 }

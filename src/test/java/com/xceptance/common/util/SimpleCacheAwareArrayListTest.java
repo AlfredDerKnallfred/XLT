@@ -35,8 +35,6 @@ public class SimpleCacheAwareArrayListTest
     @Test
     public void fillIntoSecondSlot()
     {
-        final int SLOTSIZE = SimpleCacheAwareArrayList.SUBARRAYSIZE;
-        
         final SimpleCacheAwareArrayList<Integer> l = new SimpleCacheAwareArrayList<>(1000);
         
         // fill

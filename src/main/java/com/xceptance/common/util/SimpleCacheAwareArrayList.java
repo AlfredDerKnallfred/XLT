@@ -80,220 +80,135 @@ public class SimpleCacheAwareArrayList<T> implements List<T>
         return (this.slot << (this.SHIFT + 1)) + slotPos;
     }
     
-    @Override
-    @SuppressWarnings("unchecked")
-    public T[] toArray() 
-    {
-        return null;
-//        return (T[]) Arrays.copyOf(data, size);
-    }
-    
     /**
-     * Returns view partitions on the underlying list. If the count is larger than size
-     * you get back the maximum possible list number with one element each. If count 
-     * is 0 or smaller, we correct it to 1.
+     * Creates an array of the elements. This is a copy operation!
      * 
-     * @param count how many list do we want
-     * @return a list of lists
+     * @return an array of the elements
      */
-    public List<List<T>> partition(int count)
+    @Override
+    public Object[] toArray() 
     {
-        final int _count;
-        if (count > size)
-        {
-            _count = size;
-        }
-        else
-        {
-            _count = count <= 0 ? 1 : count;
-        }
-        
-        final SimpleCacheAwareArrayList<List<T>> result = new SimpleCacheAwareArrayList<>(count);
-        
-        final int newSize = (int) Math.ceil((double) size / (double) _count); 
-        for (int i = 0; i < _count; i++)
-        {
-            int from = i * newSize;
-            int to = from + newSize - 1;
-            if (to >= size)
-            {
-                to = size - 1; 
-            }
-            result.add(new Partition<>(this, from, to));
-        }
-        
-        return result;
+        throw new IllegalArgumentException("unimplemented");
     }
-    
-    class Partition<K> extends SimpleCacheAwareArrayList<K>
-    {
-        private final int from;
-        private final int size;
-        
-        public Partition(final SimpleCacheAwareArrayList<K> list, final int from, final int to)
-        {
-            super(list);
-            
-            this.from = from;
-            this.size = to - from + 1;
-        }
-     
-        @Override
-        public boolean add(K o)
-        {
-            throw new RuntimeException("Cannot modify the partition");
-        }
-        
-        @Override
-        public K get(int index)
-        {
-            return super.get(index + from);
-        }
 
-        @Override
-        public int size()
-        {
-            return size;
-        }
-        
-        @Override
-        public K[] toArray() 
-        {
-            throw new RuntimeException("Cannot modify the partition");
-        }
-        
+    /**
+     * Creates an array of the elements. This is a copy operation!
+     * 
+     * @return an array of the elements
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T[] toArray(T[] array) 
+    {
+        throw new IllegalArgumentException("unimplemented");
+    }
+
+
+    @Override
+    public void clear()
+    {
+        throw new IllegalArgumentException("unimplemented"); 
     }
     
     @Override
     public boolean isEmpty()
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public boolean contains(Object o)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public Iterator<T> iterator()
     {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public <T> T[] toArray(T[] a)
-    {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public boolean remove(Object o)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public boolean containsAll(Collection<?> c)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public boolean addAll(Collection<? extends T> c)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends T> c)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public boolean removeAll(Collection<?> c)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public boolean retainAll(Collection<?> c)
     {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void clear()
-    {
-        // TODO Auto-generated method stub
-        
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public T set(int index, T element)
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public void add(int index, T element)
     {
-        // TODO Auto-generated method stub
-        
+        throw new IllegalArgumentException("unimplemented");        
     }
 
     @Override
     public T remove(int index)
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public int indexOf(Object o)
     {
-        // TODO Auto-generated method stub
-        return 0;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public int lastIndexOf(Object o)
     {
-        // TODO Auto-generated method stub
-        return 0;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public ListIterator<T> listIterator()
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public ListIterator<T> listIterator(int index)
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException("unimplemented");
     }
 
     @Override
     public List<T> subList(int fromIndex, int toIndex)
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException("unimplemented");
     }
 }

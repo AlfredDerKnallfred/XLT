@@ -74,7 +74,7 @@ public class SynchronizingCounter
      */
     public synchronized void awaitZero() throws InterruptedException
     {
-        while (count.get() != 0)
+        while (count.get() > 0)
         {
             wait();
         }
@@ -94,7 +94,7 @@ public class SynchronizingCounter
         // otherwise we have to go to bed again
         final long wakeUpTime = System.currentTimeMillis() + timeout;
 
-        while (count.get() != 0 && (System.currentTimeMillis() < wakeUpTime))
+        while (count.get() > 0 && (System.currentTimeMillis() < wakeUpTime))
         {
             wait(timeout);
         }
@@ -108,7 +108,7 @@ public class SynchronizingCounter
      */
     protected void check(final int value)
     {
-        if (value == 0)
+        if (value <= 0)
         {
             synchronized (this)
             {

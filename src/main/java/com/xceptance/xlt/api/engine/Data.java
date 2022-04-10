@@ -52,31 +52,23 @@ public interface Data extends Comparable<Data>
     public static final char DELIMITER = ',';
 
     /**
-     * Recreates the state of this object from a list of values separated by the DELIMITER constant
-     * which has been previously created by baseValuesFromCSV 
+     * Recreates a partial state of this object by reading the data from a buffer s and parsing it 
+     * as comma-delimited line. The result is an empty reusable object that is here for speed
+     * not functionality. The data will be internally stored and only the most essential state will be
+     * recreated first, because later we might filter things out anyway, so why waste cycles. 
+     * 
+     * @param result reusable list for the parsing results
+     * @param src the csv data as charbuffer
      */
-    public void fromCSV(SimpleArrayList<XltCharBuffer> resultSoFar);    
-    
-    /**
-     * {@inheritDoc}
-     */
-    public void baseValuesFromCSV(final SimpleArrayList<XltCharBuffer> result, final XltCharBuffer s);
+    public void baseValuesFromCSV(final SimpleArrayList<XltCharBuffer> result, final XltCharBuffer src);
 
-//    /**
-//     * Recreates the state of this object from a list of values separated by the DELIMITER constant.
-//     * This method is default to keep the API compatible. Internal processing should use the faster
-//     * version with a reusable OpenStringBuilder.
-//     * 
-//     * @param s
-//     *            the char data to parse from
-//     *            
-//     * @deprecated since XLT 6.0. This
-//     */
-//    @Deprecated
-//    public default void fromCSV(final String s)
-//    {
-//        fromCSV(XltCharBuffer.valueOf(s));
-//    }
+    /**
+     * Recreates the state of this object from a list of values separated by the DELIMITER constant
+     * which has been previously created by baseValuesFromCSV.
+     * 
+     * @param result the previously parsed data as list
+     */
+    public void fromCSV(SimpleArrayList<XltCharBuffer> result);    
     
     /**
      * Returns the name of the agent that produced this data record. Only used during report generation or analysis.

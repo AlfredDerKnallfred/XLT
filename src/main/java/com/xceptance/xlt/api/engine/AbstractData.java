@@ -34,7 +34,7 @@ public abstract class AbstractData implements Data
     /**
      * The time when the event occurred that this data record was created for.
      */
-    private long time = GlobalClock.getInstance().getTime();
+    private long time;
 
     /**
      * The type code.
@@ -68,6 +68,7 @@ public abstract class AbstractData implements Data
     {        
         this.name = name;
         this.typeCode = typeCode;
+        this.time = GlobalClock.getInstance().getTime();
     }
 
     /**
@@ -87,7 +88,7 @@ public abstract class AbstractData implements Data
     @Override
     public final void baseValuesFromCSV(final SimpleArrayList<XltCharBuffer> result, final XltCharBuffer s)
     {
-        CsvUtilsDecode.parse(result, s, DELIMITER);;
+        CsvUtilsDecode.parse(result, s, DELIMITER);
         parseBaseValues(result);
     }
 
@@ -99,7 +100,7 @@ public abstract class AbstractData implements Data
     {
         parseValues(result);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -225,6 +226,7 @@ public abstract class AbstractData implements Data
      */
     protected int getMinNoCSVElements()
     {
+        // typeCode, name, time
         return 3;
     }
 
@@ -253,7 +255,7 @@ public abstract class AbstractData implements Data
 
             if (time <= 0)
             {
-                throw new IllegalArgumentException("Invalid value for the 'time' attribute.");
+                throw new IllegalArgumentException(String.format("Invalid time value: %d", time));
             }
         }
         else
@@ -271,7 +273,7 @@ public abstract class AbstractData implements Data
      *            the list of values, must have at least the length {@link #getMinNoCSVElements()}
      */
     protected abstract void parseValues(final List<XltCharBuffer> values);
-    
+
     @Override
     public int compareTo(final Data o)
     {
@@ -279,14 +281,8 @@ public abstract class AbstractData implements Data
         {
             return this.name.compareTo(o.getName());
         }
-        else 
-        {
-            if (this.typeCode < o.getTypeCode())
-            {
-                return -1;
-            }
-        }
-        return 1;
+        
+        return this.typeCode < o.getTypeCode() ? -1 : 1;
     }
 
 

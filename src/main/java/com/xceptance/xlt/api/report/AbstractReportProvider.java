@@ -16,7 +16,6 @@
 package com.xceptance.xlt.api.report;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.xceptance.xlt.api.engine.Data;

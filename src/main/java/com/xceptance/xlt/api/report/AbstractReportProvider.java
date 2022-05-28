@@ -17,6 +17,7 @@ package com.xceptance.xlt.api.report;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.xceptance.xlt.api.engine.Data;
 import com.xceptance.xlt.api.engine.TransactionData;
@@ -37,7 +38,7 @@ public abstract class AbstractReportProvider implements ReportProvider
     /**
      * locking
      */
-    public final AtomicBoolean locked = new AtomicBoolean(false);
+    public final ReentrantLock lock = new ReentrantLock(true);
     
     /**
      * Returns the report provider's configuration. Use the configuration object to get access to general as well as
@@ -62,13 +63,13 @@ public abstract class AbstractReportProvider implements ReportProvider
     @Override
     public boolean lock()
     {
-        return locked.compareAndSet(false, true);
+        return lock.tryLock();
     }
 
     @Override
     public void unlock()
     {
-        locked.set(false);
+        lock.unlock();
     }
     
     public void processAll(final PostprocessedDataContainer dataContainer)

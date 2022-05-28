@@ -16,6 +16,7 @@
 package com.xceptance.xlt.report;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,7 +68,7 @@ class StatisticsProcessor
      *
      * @return maximum time
      */
-    public final long getMaximumTime()
+    public synchronized long getMaximumTime()
     {
         return maximumTime;
     }
@@ -77,7 +78,7 @@ class StatisticsProcessor
      *
      * @return minimum time
      */
-    public final long getMinimumTime()
+    public synchronized long getMinimumTime()
     {
         return (minimumTime == Long.MAX_VALUE) ? 0 : minimumTime;
     }
@@ -99,6 +100,7 @@ class StatisticsProcessor
         
         // get your own list
         final List<ReportProvider> providerList = new ArrayList<>(reportProviders);
+        Collections.shuffle(providerList);
 
         // run as long as we have not all data put into the report providers
         while (providerList.isEmpty() == false)

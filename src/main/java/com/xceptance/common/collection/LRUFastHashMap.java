@@ -14,9 +14,9 @@ public class LRUFastHashMap<K, V>
         this.capacity = capacity;
         this.slotSize = this.capacity / 3;
         
-        m1 = new FastHashMap<>(slotSize, 0.5f);
-        m2 = new FastHashMap<>(slotSize, 0.5f);
-        m3 = new FastHashMap<>(slotSize, 0.5f);
+        m1 = new FastHashMap<>(2 * slotSize, 0.5f);
+        m2 = new FastHashMap<>(10, 0.5f);
+        m3 = new FastHashMap<>(10, 0.5f);
     }
     
     public V get(final K key)
@@ -51,7 +51,7 @@ public class LRUFastHashMap<K, V>
         {
             m3 = m2;
             m2 = m1;
-            m1 = new FastHashMap<>(slotSize, 0.5f);
+            m1 = new FastHashMap<>(2 * slotSize, 0.5f);
         }
         
         return old;

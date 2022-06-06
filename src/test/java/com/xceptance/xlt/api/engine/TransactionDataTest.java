@@ -141,7 +141,7 @@ public class TransactionDataTest extends TimerDataTest
     }
 
     /**
-     * Tests the implementation of {@link TransactionData#fromCSV(String)} using a CSV line that was created before XLT
+     * Tests the implementation of {@link TransactionData#remainingFromCSV(String)} using a CSV line that was created before XLT
      * 4.13.2.
      */
     @Test
@@ -156,7 +156,7 @@ public class TransactionDataTest extends TimerDataTest
         final String csvLine = CsvUtils.encode(elements.toArray(new String[elements.size()]));
 
         // read in CSV representation and parse it
-        instance.fromCSV(csvLine);
+        instance.remainingFromCSV(csvLine);
         instance.setAgentName(agentName);
 
         // validate
@@ -168,7 +168,7 @@ public class TransactionDataTest extends TimerDataTest
     }
 
     /**
-     * Tests the implementation of {@link TransactionData#fromCSV(String)} using a CSV line that was created with XLT
+     * Tests the implementation of {@link TransactionData#remainingFromCSV(String)} using a CSV line that was created with XLT
      * 4.13.2.
      */
     @Test
@@ -185,7 +185,7 @@ public class TransactionDataTest extends TimerDataTest
         final String csvLine = CsvUtils.encode(elements.toArray(new String[elements.size()]));
 
         // read in CSV representation and parse it
-        instance.fromCSV(csvLine);
+        instance.remainingFromCSV(csvLine);
         instance.setAgentName(agentName);
 
         // validate

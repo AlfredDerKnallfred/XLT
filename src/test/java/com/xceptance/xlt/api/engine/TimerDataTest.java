@@ -69,7 +69,7 @@ public class TimerDataTest extends AbstractDataTest
     }
 
     /**
-     * Tests the implementation of {@link TimerData#fromCSV(String)}.
+     * Tests the implementation of {@link TimerData#remainingFromCSV(String)}.
      * <p>
      * Passed CSV string misses the values for the runtime and failed fields.
      * </p>
@@ -77,11 +77,11 @@ public class TimerDataTest extends AbstractDataTest
     @Test(expected = IllegalArgumentException.class)
     public void csvMissesRuntimeAndFailed()
     {
-        instance.fromCSV(commonCSV);
+        instance.remainingFromCSV(commonCSV);
     }
 
     /**
-     * Tests the implementation of {@link TimerData#fromCSV(String)}.
+     * Tests the implementation of {@link TimerData#remainingFromCSV(String)}.
      * <p>
      * Passed CSV string misses the value for the failed field.
      * </p>
@@ -89,14 +89,14 @@ public class TimerDataTest extends AbstractDataTest
     @Test(expected = IllegalArgumentException.class)
     public void csvMissesFailed()
     {
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, runTime
             }, Data.DELIMITER));
     }
 
     /**
-     * Tests the implementation of {@link TimerData#fromCSV(String)}.
+     * Tests the implementation of {@link TimerData#remainingFromCSV(String)}.
      * <p>
      * Passed CSV string misses the value for the failed field.
      * </p>
@@ -104,14 +104,14 @@ public class TimerDataTest extends AbstractDataTest
     @Test(expected = IllegalArgumentException.class)
     public void csvMissesRuntime()
     {
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, failed
             }, Data.DELIMITER));
     }
 
     /**
-     * Tests the implementation of {@link TimerData#fromCSV(String)}.
+     * Tests the implementation of {@link TimerData#remainingFromCSV(String)}.
      * <p>
      * The value of the field <code>runTime</code> is not a valid string representation of a long value. Expecting a
      * NumberFormatException.
@@ -120,14 +120,14 @@ public class TimerDataTest extends AbstractDataTest
     @Test(expected = NumberFormatException.class)
     public void runTimeInCVSNotLong()
     {
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, "NotALong", failed
             }, Data.DELIMITER));
     }
 
     /**
-     * Tests the implementation of {@link TimerData#fromCSV(String)}.
+     * Tests the implementation of {@link TimerData#remainingFromCSV(String)}.
      * <p>
      * The value of the field <code>runTime</code> is negative. Expecting a RuntimeException.
      * </p>
@@ -135,14 +135,14 @@ public class TimerDataTest extends AbstractDataTest
     @Test(expected = RuntimeException.class)
     public void runTimeInCVSNegative()
     {
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, -runTime, failed
             }, Data.DELIMITER));
     }
 
     /**
-     * Tests the implementation of {@link TimerData#fromCSV(String)}.
+     * Tests the implementation of {@link TimerData#remainingFromCSV(String)}.
      * <p>
      * The value of the field <code>failed</code> is not a valid string representation of a boolean value.
      * </p>
@@ -151,7 +151,7 @@ public class TimerDataTest extends AbstractDataTest
     public void failedInCSVNotBoolean()
     {
         final String failed = "NotaBool";
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, runTime, failed
             }, Data.DELIMITER));
@@ -160,7 +160,7 @@ public class TimerDataTest extends AbstractDataTest
     }
 
     /**
-     * Tests the implementation of {@link TimerData#fromCSV(String)}.
+     * Tests the implementation of {@link TimerData#remainingFromCSV(String)}.
      * <p>
      * Test uses a compatible CSV representation and checks if all values have been applied.
      * </p>
@@ -170,7 +170,7 @@ public class TimerDataTest extends AbstractDataTest
     public void testFromCSV_CompatibleCSV()
     {
         // read in CSV representation and parse it
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, runTime, failed
             }, Data.DELIMITER));

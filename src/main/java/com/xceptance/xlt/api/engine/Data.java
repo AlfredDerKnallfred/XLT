@@ -68,7 +68,7 @@ public interface Data extends Comparable<Data>
      * 
      * @param result the previously parsed data as list
      */
-    public void fromCSV(SimpleArrayList<XltCharBuffer> result);    
+    public void remainingFromCSV(SimpleArrayList<XltCharBuffer> result);    
     
     /**
      * Returns the name of the agent that produced this data record. Only used during report generation or analysis.

@@ -142,6 +142,12 @@ public class EventData extends AbstractData
     @Override
     protected void parseValues(final List<XltCharBuffer> values)
     {
+        // we don't need to call super, because our two step
+        // init process took care of setting the base values
+        // typecode - 0
+        // name - 1
+        // time - 2
+        
         // read and check the values
         testCaseName = values.get(3).toString();
         message = values.get(4).toString();

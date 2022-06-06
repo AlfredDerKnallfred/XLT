@@ -63,7 +63,7 @@ public class PerformanceDataTransformatorTest
         final ClientPerformanceData exampleRequest = new ClientPerformanceData();
         {
             final ClientPerformanceRequest r = new ClientPerformanceRequest();
-            r.getRequestData().fromCSV("R,xyz,1,0,true,0,0,0,http://example.net,,0,0,0,0,0,0,,,,,0");
+            r.getRequestData().remainingFromCSV("R,xyz,1,0,true,0,0,0,http://example.net,,0,0,0,0,0,0,,,,,0");
             r.getRequestData().setTime(0);
             r.setHttpMethod("GET");
             if (SessionImpl.COLLECT_ADDITIONAL_REQUEST_DATA)

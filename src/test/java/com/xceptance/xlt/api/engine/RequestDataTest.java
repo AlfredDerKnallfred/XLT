@@ -109,7 +109,7 @@ public class RequestDataTest extends TimerDataTest
     private final String ipAddresses = "127.0.0.1";
 
     /**
-     * Tests the implementation of {@link RequestData#fromCSV(String)}.
+     * Tests the implementation of {@link RequestData#remainingFromCSV(String)}.
      * <p>
      * Passes CVS string misses all additional fields maintained by this class.
      * </p>
@@ -122,11 +122,11 @@ public class RequestDataTest extends TimerDataTest
         // read in common CSV string (no bytesSent, bytesReceived and
         // responseCode
         // values)
-        instance.fromCSV(commonCSV);
+        instance.remainingFromCSV(commonCSV);
     }
 
     /**
-     * Tests the implementation of {@link RequestData#fromCSV(String)}.
+     * Tests the implementation of {@link RequestData#remainingFromCSV(String)}.
      * <p>
      * Passed CSV string misses the values for the number of bytes received and for the response code.
      * </p>
@@ -137,14 +137,14 @@ public class RequestDataTest extends TimerDataTest
         RequestData instance = new RequestData();
 
         // read in CSV string
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, bytesSent
             }, Data.DELIMITER));
     }
 
     /**
-     * Tests the implementation of {@link RequestData#fromCSV(String)}.
+     * Tests the implementation of {@link RequestData#remainingFromCSV(String)}.
      * <p>
      * Passed CSV string misses the value for the response code.
      * </p>
@@ -155,14 +155,14 @@ public class RequestDataTest extends TimerDataTest
         RequestData instance = new RequestData();
 
         // read in CSV string
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, bytesSent, bytesReceived
             }, Data.DELIMITER));
     }
 
     /**
-     * Tests the implementation of {@link RequestData#fromCSV(String)}.
+     * Tests the implementation of {@link RequestData#remainingFromCSV(String)}.
      * <p>
      * The value of the field <code>bytesSent</code> is not a valid string representation of an integer value. Expecting
      * a NumberFormatException.
@@ -174,7 +174,7 @@ public class RequestDataTest extends TimerDataTest
         RequestData instance = new RequestData();
 
         // read in CSV string
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, "notanInt", bytesReceived, responseCode, url, contentType
             }, Data.DELIMITER));
@@ -182,7 +182,7 @@ public class RequestDataTest extends TimerDataTest
     }
 
     /**
-     * Tests the implementation of {@link RequestData#fromCSV(String)}.
+     * Tests the implementation of {@link RequestData#remainingFromCSV(String)}.
      * <p>
      * The value of the field <code>bytesSent</code> is negative. Expecting a RuntimeException.
      * </p>
@@ -193,14 +193,14 @@ public class RequestDataTest extends TimerDataTest
         RequestData instance = new RequestData();
 
         // read in CSV string
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, -bytesSent, bytesReceived, responseCode, url, contentType
             }, Data.DELIMITER));
     }
 
     /**
-     * Tests the implementation of {@link RequestData#fromCSV(String)}.
+     * Tests the implementation of {@link RequestData#remainingFromCSV(String)}.
      * <p>
      * The value of the field <code>bytesReceived</code> is not a valid string representation of an integer value.
      * Expecting a NumberFormatException.
@@ -212,14 +212,14 @@ public class RequestDataTest extends TimerDataTest
         RequestData instance = new RequestData();
 
         // read in CSV string
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, bytesSent, "NotAnInt", responseCode, url, contentType
             }, Data.DELIMITER));
     }
 
     /**
-     * Tests the implementation of {@link RequestData#fromCSV(String)}.
+     * Tests the implementation of {@link RequestData#remainingFromCSV(String)}.
      * <p>
      * The value of the field <code>bytesReceived</code> is negative. Expecting a RuntimeException.
      * </p>
@@ -230,14 +230,14 @@ public class RequestDataTest extends TimerDataTest
         RequestData instance = new RequestData();
 
         // read in CSV string
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, bytesSent, -bytesReceived, responseCode, url, contentType
             }, Data.DELIMITER));
     }
 
     /**
-     * Tests the implementation of {@link RequestData#fromCSV(String)}.
+     * Tests the implementation of {@link RequestData#remainingFromCSV(String)}.
      * <p>
      * The value of the field <code>responseCode</code> is not a valid string representation of an integer value.
      * Expecting a NumberFormatException.
@@ -249,14 +249,14 @@ public class RequestDataTest extends TimerDataTest
         RequestData instance = new RequestData();
 
         // read in CSV string
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, bytesSent, bytesReceived, "NotInt", url, contentType
             }, Data.DELIMITER));
     }
 
     /**
-     * Tests the implementation of {@link RequestData#fromCSV(String)}.
+     * Tests the implementation of {@link RequestData#remainingFromCSV(String)}.
      * <p>
      * The value of the field <code>responseCode</code> is negative.
      * </p>
@@ -267,14 +267,14 @@ public class RequestDataTest extends TimerDataTest
         RequestData instance = new RequestData();
 
         // read in CSV string
-        instance.fromCSV(StringUtils.join(new Object[]
+        instance.remainingFromCSV(StringUtils.join(new Object[]
             {
                 commonCSV, bytesSent, bytesReceived, -1, url, contentType
             }, Data.DELIMITER));
     }
 
     /**
-     * Tests the implementation of {@link RequestData#fromCSV(String)}.
+     * Tests the implementation of {@link RequestData#remainingFromCSV(String)}.
      * <p>
      * The value of the field <code>url</code> contains the CSV delimiter. This test actually fails and is tracked as
      * bug #101.
@@ -297,7 +297,7 @@ public class RequestDataTest extends TimerDataTest
         elements.add(contentType);
 
         // read in CSV string
-        instance.fromCSV(CsvUtils.encode(elements.toArray(new String[elements.size()])));
+        instance.remainingFromCSV(CsvUtils.encode(elements.toArray(new String[elements.size()])));
 
         // validate data record
         Assert.assertEquals(name, instance.getName());
@@ -311,7 +311,7 @@ public class RequestDataTest extends TimerDataTest
     }
 
     /**
-     * Tests the implementation of {@link RequestData#fromCSV(String)}.
+     * Tests the implementation of {@link RequestData#remainingFromCSV(String)}.
      * <p>
      * The value of the field <code>contentType</code> contains the CSV delimiter.
      * </p>
@@ -333,7 +333,7 @@ public class RequestDataTest extends TimerDataTest
         elements.add(contentType);
 
         // read in CSV string
-        instance.fromCSV(CsvUtils.encode(elements.toArray(new String[elements.size()])));
+        instance.remainingFromCSV(CsvUtils.encode(elements.toArray(new String[elements.size()])));
 
         // validate data record
         Assert.assertEquals(name, instance.getName());
@@ -364,7 +364,7 @@ public class RequestDataTest extends TimerDataTest
             }, Data.DELIMITER);
 
         // read in CSV string
-        instance.fromCSV(csvLine);
+        instance.remainingFromCSV(csvLine);
 
         // validate output of toCSV()
         Assert.assertEquals(csvLine, instance.toCSV());
@@ -388,7 +388,7 @@ public class RequestDataTest extends TimerDataTest
             }, Data.DELIMITER);
 
         // read in CSV string
-        instance.fromCSV(csvLine);
+        instance.remainingFromCSV(csvLine);
 
         // validate output of toCSV()
         Assert.assertEquals(csvLine, instance.toCSV());
@@ -412,7 +412,7 @@ public class RequestDataTest extends TimerDataTest
             }, Data.DELIMITER);
 
         // read in CSV string
-        instance.fromCSV(csvLine);
+        instance.remainingFromCSV(csvLine);
 
         // validate output of toCSV()
         Assert.assertEquals(csvLine, instance.toCSV());
@@ -436,7 +436,7 @@ public class RequestDataTest extends TimerDataTest
             }, Data.DELIMITER);
 
         // read in CSV string
-        instance.fromCSV(csvLine);
+        instance.remainingFromCSV(csvLine);
 
         Assert.assertEquals(0, instance.getConnectTime());
         Assert.assertEquals(0, instance.getSendTime());
@@ -466,7 +466,7 @@ public class RequestDataTest extends TimerDataTest
         final String csvLine = getBeforeXLT4_6_6_CSVLine(false);
 
         // read in CSV string
-        instance.fromCSV(csvLine);
+        instance.remainingFromCSV(csvLine);
 
         validateBeforeXLT4_6_6_RequestData(instance, false);
 
@@ -492,7 +492,7 @@ public class RequestDataTest extends TimerDataTest
         final String csvLine = getBeforeXLT4_6_6_CSVLine(true);
 
         // read in CSV string
-        instance.fromCSV(csvLine);
+        instance.remainingFromCSV(csvLine);
 
         validateBeforeXLT4_6_6_RequestData(instance, true);
 
@@ -517,7 +517,7 @@ public class RequestDataTest extends TimerDataTest
         final String csvLine = getXLT4_6_6_CSVLine(false);
 
         // read in CSV string
-        instance.fromCSV(csvLine);
+        instance.remainingFromCSV(csvLine);
 
         validateXLT4_6_6_RequestData(instance, false);
 
@@ -543,7 +543,7 @@ public class RequestDataTest extends TimerDataTest
         final String csvLine = getXLT4_6_6_CSVLine(true);
 
         // read in CSV string
-        instance.fromCSV(csvLine);
+        instance.remainingFromCSV(csvLine);
 
         validateXLT4_6_6_RequestData(instance, true);
 
@@ -569,7 +569,7 @@ public class RequestDataTest extends TimerDataTest
         final String csvLine = getXLT4_7_0_CSVLine(true);
 
         // read in CSV string
-        instance.fromCSV(csvLine);
+        instance.remainingFromCSV(csvLine);
 
         validateXLT4_7_0_RequestData(instance);
 
@@ -578,7 +578,7 @@ public class RequestDataTest extends TimerDataTest
     }
 
     /**
-     * Tests the implementation of {@link RequestData#fromCSV(String)} and {@link RequestData#toCSV()}.
+     * Tests the implementation of {@link RequestData#remainingFromCSV(String)} and {@link RequestData#toCSV()}.
      */
     @Test
     public void testParsingCompatibility_XLT_4_12_0()
@@ -587,7 +587,7 @@ public class RequestDataTest extends TimerDataTest
 
         final String csvLine = getXLT4_12_0_CSVLine(true);
 
-        instance.fromCSV(csvLine);
+        instance.remainingFromCSV(csvLine);
         validateXLT4_12_0_RequestData(instance);
 
         Assert.assertEquals(csvLine, instance.toCSV());

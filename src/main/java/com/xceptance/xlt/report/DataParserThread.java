@@ -205,7 +205,7 @@ class DataParserThread implements Runnable
                         }
 
                         // finish parsing
-                        data.fromCSV(csvParseResultBuffer);
+                        data.remainingFromCSV(csvParseResultBuffer);
                     }
                     catch (final Exception ex)
                     {

@@ -96,7 +96,7 @@ public abstract class AbstractData implements Data
      * {@inheritDoc}
      */
     @Override
-    public final void fromCSV(final SimpleArrayList<XltCharBuffer> result)
+    public final void remainingFromCSV(final SimpleArrayList<XltCharBuffer> result)
     {
         parseValues(result);
     }

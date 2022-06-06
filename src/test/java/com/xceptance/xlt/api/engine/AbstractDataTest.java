@@ -240,7 +240,7 @@ public class AbstractDataTest
         
         var d = new TestData(TYPECODE);
         d.baseValuesFromCSV(l, data);
-        d.fromCSV(l);
+        d.remainingFromCSV(l);
         
         assertEquals('X', d.getTypeCode());
         assertEquals("Name", d.getName());
@@ -259,7 +259,7 @@ public class AbstractDataTest
 
         var d = new TestData(TYPECODE);
         d.baseValuesFromCSV(l, data);
-        d.fromCSV(l);
+        d.remainingFromCSV(l);
         
         assertEquals(csv, d.toCSV());
     }
@@ -280,7 +280,7 @@ public class AbstractDataTest
                 var l = new SimpleArrayList<XltCharBuffer>(3);
                 var d = new TestData(t);
                 d.baseValuesFromCSV(l, u);
-                d.fromCSV(l);
+                d.remainingFromCSV(l);
                 return d;
             }
         };
